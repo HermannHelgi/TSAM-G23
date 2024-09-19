@@ -58,12 +58,88 @@ int Send_UDP_Packet(int udpsock, void* data, int data_len, void* buffer, int buf
     return 0;
 }
 
-int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint32_t destPort, uint32_t checksum, uint32_t data)
+int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum, uint32_t data)
 {
     uint64_t sum = 0;
+    sum += 17;
 
-    uint32_t reserved = 17;
-    
+    uint32_t srcIp2 = (srcIp >> 16) & 0xFFFF; // top half
+    srcIp = srcIp & 0xFFFF;
+    sum += srcIp2 + srcIp;
+
+    uint32_t destIp2 = (destIp >> 16) & 0xFFFF; // top half
+    destIp = destIp & 0xFFFF;
+    sum += destIp2 + destIp;
+
+    sum += destPort;
+    sum += srcPort;
+
+    if (data == 0) // Need to find data
+    {
+        sum += 10; // Length in pseudo header
+        sum += 10; // Length in header
+
+        uint32_t sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        // Could potentially overflow from the carry-bit, safety check.
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        sum = (~sum) & 0xFFFF;
+        sum += checksum;
+
+        // Overflow, again.
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        // Overflow, again.
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        
+        return sum;
+    }
+    else if (checksum == 0) // need to find checksum
+    {
+        // THIS COULD POTENTIALLY LEAD TO BUGS IF DATA IS SMALLER THAN 4 BYTES
+        sum += 12; // Length in pseudo header
+        sum += 12; // Length in header
+
+        uint32_t sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        // Could potentially overflow from the carry-bit, safety check.
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        sum += (data >> 16) & 0xFFFF;
+        sum += data & 0xFFFF;
+
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+        sumTemp = 0;
+
+        // Could potentially overflow from the carry-bit, safety check.
+        sumTemp = (sum >> 16) & 0xFFFF;
+        sum = sum & 0xFFFF;
+        sum += sumTemp;
+
+        sum = (~sum) & 0xFFFF;
+
+        return sum;
+    }
 }
 
 int main(int argc, char* argv[])
@@ -182,6 +258,8 @@ int main(int argc, char* argv[])
             cout << hex;
             cout << ip << endl;
             cout << mask << endl;
+
+            cout << "CHECK: 0x" << Calculate_Checksum(0xC0A8001F, 0xC0A8001E, 20, 10, 0, 0x4869) << endl;
         }
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
