@@ -267,10 +267,22 @@ int main(int argc, char* argv[])
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
 
-            // Don't need to convert group number as it is only a single byte.
+            memset(buffer, 0, sizeof(buffer));
+            struct ip *iphdr;
 
-            wait = Send_UDP_Packet(udpsock, &group_number, 1, &response, sizeof(response), server_addr, server_addr_len);
+            uint64_t response;
+        
+            //Send Signature
+            wait = Send_UDP_Packet(udpsock, &Signature, 4, &response, sizeof(response), server_addr, server_addr_len);
 
+
+
+            cout << buffer << endl;
+
+            string temp = buffer;
+
+            //temp = temp.substr(64, 4);
+            //secretport2 = stoi(temp);
 
 
 
