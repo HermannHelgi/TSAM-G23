@@ -58,6 +58,40 @@ int Send_UDP_Packet(int udpsock, void* data, int data_len, void* buffer, int buf
     return 0;
 }
 
+//Returns in network byte order !
+int Calculate_checksum_ipv4(ip* my_header)
+{
+
+    uint32_t sum;
+
+    sum += my_header->ip_v;
+    sum += my_header->ip_hl;
+    sum += my_header->ip_tos;
+
+    sum += my_header->ip_len;
+
+    sum += my_header->ip_id;
+    
+    sum += my_header->ip_off;
+    sum += my_header->ip_ttl;
+
+    //Check if need to carry the front bit
+    if(sum & 0xFFFF0000)
+    {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    };
+
+    sum += my_header->ip_src.s_addr;
+    if(sum & 0xFFFF0000)
+    {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    };
+    sum += my_header->ip_dst.s_addr;
+
+
+    return htonl(sum);
+}
+
 int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum, uint32_t data)
 {
     uint64_t sum = 0;
@@ -295,24 +329,66 @@ int main(int argc, char* argv[])
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
 
-            memset(buffer, 0, sizeof(buffer));
+            
+            char* packet = new char[32];
+            memset(packet, 0, 32);
+
+            uint32_t reserved_bit_mask = 0x8000;
             struct ip *iphdr;
 
-            uint64_t response;
-        
-            //Send Signature
-            wait = Send_UDP_Packet(udpsock, &Signature, 4, &response, sizeof(response), server_addr, server_addr_len);
+            //Note what ever is larger then one byte NEEDS to be in network byte order
+
+            iphdr = (struct ip*)packet;
+            iphdr->ip_v = 4;
+            iphdr->ip_hl = 5;
+            iphdr->ip_len = htonl(32);
+            iphdr->ip_tos = 0;
+            iphdr->ip_id = 0;
+            iphdr->ip_off = iphdr->ip_off | reserved_bit_mask;
+            iphdr->ip_ttl = 64;
+            iphdr->ip_p = IPPROTO_UDP;
+            iphdr->ip_dst.s_addr = inet_addr(argv[1]);
+            iphdr->ip_src.s_addr = htonl(server_addr.sin_port);
+            iphdr->ip_sum = Calculate_checksum_ipv4(iphdr);
+
+            //TODO create udp hdr to send over raw socket.
+            struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
+            //uint32_t my_checksum = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohl(sin.sin_port), ports[i], 0, Signature);
 
 
+            //TODO memcpy the packet with the signiture.
 
+            memset(buffer, 0, sizeof(buffer));
+
+            
+            //TODO create the raw socket so that we can use our own ip and udp headers.
+            //NOTE requires root privlage to run !!
+            //  sudo ./puzzlesolver ....
+            int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
+            if(raw_sock < 0)
+            {
+                cout << "Error on creating raw socket." << endl;
+            }
+            int opt;
+            if(setsockopt(raw_sock,IPPROTO_IP,IP_HDRINCL,&opt,sizeof(opt)) < 0)
+            {
+                cout << "Failed to set socket options" <<
+            }
+            if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
+            {
+                cout << "Failed to set socket address." << endl;
+            }
+
+            //TODO send & recv data
+            int rsp = sendto(raw_sock,packet,sizeof(packet),0,(sockaddr*)&server_addr, sizeof(server_addr));
+            if(rsp > 0)
+            {
+                cout << "We got a respone :). Time to see what it says..." << endl;
+            }
+            
+            //TODO create recv section
+            cout << endl;
             cout << buffer << endl;
-
-            string temp = buffer;
-
-            //temp = temp.substr(64, 4);
-            //secretport2 = stoi(temp);
-
-
 
         }
         if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
