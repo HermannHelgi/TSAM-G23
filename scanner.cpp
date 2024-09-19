@@ -16,6 +16,8 @@ int main(int argc, char* argv[])
     if (argc != 4)
     {
         cout << "Missing arguments." << endl;
+        cout << "Please run the program like so" << endl;
+        cout << "./scanner <IP address> <low port> <high port>" << endl;
         return 0;
     }
 

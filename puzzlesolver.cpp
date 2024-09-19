@@ -147,6 +147,8 @@ int main(int argc, char* argv[])
     if (argc != 6)
     {
         cout << "Wrong number of arguments given." << endl;
+        cout << "Please run the program like so" << endl;
+        cout << "./puzzlesolver <IP address> <port 1> <port 2> <port 3> <port 4>" << endl;
         return 0;
     }
 
@@ -289,10 +291,29 @@ int main(int argc, char* argv[])
             cout << buffer << endl;
             
         }
+
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
-            // Needs to be moved, have to first get signature from third_puzzle
-            continue;
+
+            memset(buffer, 0, sizeof(buffer));
+            struct ip *iphdr;
+
+            uint64_t response;
+        
+            //Send Signature
+            wait = Send_UDP_Packet(udpsock, &Signature, 4, &response, sizeof(response), server_addr, server_addr_len);
+
+
+
+            cout << buffer << endl;
+
+            string temp = buffer;
+
+            //temp = temp.substr(64, 4);
+            //secretport2 = stoi(temp);
+
+
+
         }
         if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
         {
