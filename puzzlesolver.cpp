@@ -246,20 +246,48 @@ int main(int argc, char* argv[])
             wait = Send_UDP_Packet(udpsock, &Signature, 4, &buffer, sizeof(buffer), server_addr, server_addr_len);
 
             int length_of_message = strlen(buffer);
-            uint32_t mask;
+            uint32_t checksum;
             uint32_t ip;
-            memcpy(&mask, buffer + length_of_message - 6, 2);
+            memcpy(&checksum, buffer + length_of_message - 6, 2);
             memcpy(&ip, buffer + length_of_message - 4, 4);
         
-            mask = ntohl(mask);
-            mask = mask >> 16;
+            checksum = ntohl(checksum);
+            checksum = checksum >> 16;
             ip = ntohl(ip);
 
-            cout << hex;
-            cout << ip << endl;
-            cout << mask << endl;
+            struct sockaddr_in sin;
+            socklen_t len = sizeof(sin);
+            if (getsockname(udpsock, (struct sockaddr *)&sin, &len) == -1)
+                cout << "Getsockname failed." << endl;
 
-            cout << "CHECK: 0x" << Calculate_Checksum(0xC0A8001F, 0xC0A8001E, 20, 10, 0, 0x4869) << endl;
+            uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohl(sin.sin_port), ports[i], checksum, 0);
+
+            char* packet = new char[30];
+            memset(packet, 0, 30);
+            struct ip *iphdr = (struct ip*)packet;
+            struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
+
+            iphdr->ip_hl = 5;
+            iphdr->ip_v = 4;
+            iphdr->ip_tos = 0;
+            iphdr->ip_len = 30;
+            iphdr->ip_off = 0;
+            iphdr->ip_ttl = 64;
+            iphdr->ip_p = IPPROTO_UDP;
+            iphdr->ip_dst.s_addr = inet_addr(argv[1]); // Comes out in network byte order
+            iphdr->ip_src.s_addr = htonl(ip);
+
+            udphdr->check = htonl(checksum);
+            udphdr->dest = htonl(ports[i]);
+            udphdr->source = sin.sin_port; // Comes out in network byte order
+            udphdr->len = 10;
+
+            memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &data, 2);
+
+            memset(buffer, 0, sizeof(buffer));
+            wait = Send_UDP_Packet(udpsock, &packet, sizeof(packet), &buffer, sizeof(buffer), server_addr, server_addr_len);
+            cout << buffer << endl;
+            
         }
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
