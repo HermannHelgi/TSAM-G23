@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
             int opt;
             if(setsockopt(raw_sock,IPPROTO_IP,IP_HDRINCL,&opt,sizeof(opt)) < 0)
             {
-                cout << "Failed to set socket options" <<
+                cout << "Failed to set socket options" << endl;
             }
             if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
             {
