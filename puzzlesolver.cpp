@@ -45,7 +45,7 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
 
             if (recv_len <= 0)
             {
-                cout << "recv() failed" << endl;
+                continue;
             }
             else
             {
@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
                 
                     if (recv_len <= 0)
                     {
-                        cout << "Recv failed" << endl;
+                        continue;
                     }
                     else
                     {
