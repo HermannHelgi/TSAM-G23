@@ -348,10 +348,10 @@ int main(int argc, char* argv[])
             iphdr = (struct ip*)packet;
             iphdr->ip_v = 4;
             iphdr->ip_hl = 5;
-            iphdr->ip_len = 32;
+            iphdr->ip_len = htons(32);
             iphdr->ip_tos = 0;
             iphdr->ip_id = 0;
-            iphdr->ip_off = iphdr->ip_off | reserved_bit_mask;
+            iphdr->ip_off = htons(iphdr->ip_off | reserved_bit_mask);
             iphdr->ip_ttl = 64;
             iphdr->ip_p = IPPROTO_UDP;
             iphdr->ip_dst.s_addr = inet_addr(argv[1]);
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 
             struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
 
-            udphdr->dest = htonl(ports[i]);
+            udphdr->dest = htons((unsigned int)ports[i]);
             udphdr->source = server_addr.sin_port; // Comes out in network byte order
             udphdr->len = htons(12);
             udphdr->check = 0;
@@ -371,12 +371,7 @@ int main(int argc, char* argv[])
             //NOTE requires root privlage to run !!
             //  sudo ./puzzlesolver ....
 
-            cout << hex;
-            for (int i = 0; i < 32; i++)
-            {
-                cout << (unsigned int)packet[i] << endl;
-            }
-            cout << Signature << endl;
+
 
             int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
             if(raw_sock < 0)
@@ -393,16 +388,33 @@ int main(int argc, char* argv[])
                 cout << "Failed to set socket address." << endl;
             }
 
-            //TODO send & recv data
-            int rsp = sendto(raw_sock, packet, 32, 0, (sockaddr*)&server_addr, sizeof(server_addr));
-            if(rsp > 0)
+            for (int i = 0; i < 5; i++)
             {
-                cout << "We got a respone :). Time to see what it says..." << endl;
+
+                int rsp = sendto(raw_sock, packet, 32, 0, (sockaddr*)&server_addr, sizeof(server_addr));
+                if(rsp < 0)
+                {
+                    continue;
+                }   
+                else
+                {
+                    int recv_len = recvfrom(udpsock, buffer, 1024, 0, (sockaddr*)&server_addr, &server_addr_len);
+                
+                    if (recv_len <= 0)
+                    {
+                        cout << "Recv failed" << endl;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                
+                }
             }
-            
-            int recv_len = recvfrom(udpsock, buffer, 1024, 0, (sockaddr*)&server_addr, &server_addr_len);
-            cout << endl;
             cout << buffer << endl;
+            string temp = buffer;
+            temp = temp.substr(72, 5);
+            secretport2 = stoi(temp);
 
         }
         if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
