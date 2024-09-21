@@ -11,6 +11,8 @@
 #include <string>
 #include <cstring>
 #include <endian.h>
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -19,7 +21,7 @@ int is_little_endian() {
     return (*(char *)&x == 1);  // If first byte is 1, it's little-endian
 }
 
-int Send_UDP_Packet(int udpsock, void* data, int data_len, void* buffer, int buffer_size, sockaddr_in server_addr, socklen_t server_addr_len)
+int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, int buffer_size, sockaddr_in server_addr, socklen_t server_addr_len)
 {
     fd_set set;
     int compare;
@@ -417,18 +419,45 @@ int main(int argc, char* argv[])
             secretport2 = stoi(temp);
 
         }
+
+    }
+    
+    for (int i = 0; i < 4; i++)
+    {
+        server_addr.sin_port = htons(ports[i]);
+
+        memset(buffer, 0, sizeof(buffer));
+        wait = Send_UDP_Packet(udpsock, NULL, 0, buffer, sizeof(buffer), server_addr, server_addr_len);
+
         if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
         {
 
-            string data = to_string(secretport1) + ", " + to_string(secretport2);
-            cout << data << endl;
+            string data = to_string(secretport1) + "," + to_string(secretport2);
             memset(buffer, 0, sizeof(buffer));
-            wait = Send_UDP_Packet(udpsock, &data, sizeof(data), &buffer, sizeof(buffer), server_addr, server_addr_len);
+
+            wait = Send_UDP_Packet(udpsock, data.data(), data.length(), &buffer, sizeof(buffer), server_addr, server_addr_len);
             
-            cout << buffer << endl;
+            string knock = buffer;
+            stringstream s(knock);
 
+            string knock_port;
 
+            unsigned char* packet = new unsigned char[4 + secretphrase.length()];
+            memcpy(packet,&Signature,4);
+            memcpy(packet + 4, secretphrase.c_str(), secretphrase.length());
 
+            cout << packet << endl;
+
+            while (!s.eof()) 
+            {
+                getline(s, knock_port, ',');
+                server_addr.sin_port = htons(stoi(knock_port));
+
+                memset(buffer, 0, sizeof(buffer));
+                wait = Send_UDP_Packet(udpsock, &packet, 4 + secretphrase.length(), &buffer, sizeof(buffer), server_addr, server_addr_len);
+
+                cout << buffer << endl;
+            }
         }
     }
 }
