@@ -272,12 +272,20 @@ int main(int argc, char* argv[])
             iphdr->ip_hl = 5;
             iphdr->ip_v = 4;
             iphdr->ip_tos = 0;
-            iphdr->ip_len = 30;
+            iphdr->ip_len = 32;
             iphdr->ip_off = 0;
             iphdr->ip_ttl = 64;
             iphdr->ip_p = IPPROTO_UDP;
             iphdr->ip_dst.s_addr = inet_addr(argv[1]); // Comes out in network byte order
             iphdr->ip_src.s_addr = htonl(ip);
+
+            // iphdr->ip_sum = Calculate_ip_checksum(iphdr);
+
+            cout << hex;
+            for (int i = 0; i < 20; i++)
+            {
+                cout << (int)packet[i] << endl;
+            }
 
             udphdr->check = htonl(checksum);
             udphdr->dest = htonl(ports[i]);
@@ -289,7 +297,6 @@ int main(int argc, char* argv[])
             memset(buffer, 0, sizeof(buffer));
             wait = Send_UDP_Packet(udpsock, &packet, sizeof(packet), &buffer, sizeof(buffer), server_addr, server_addr_len);
             cout << buffer << endl;
-            
         }
 
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
