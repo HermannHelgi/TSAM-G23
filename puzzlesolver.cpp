@@ -263,7 +263,6 @@ int main(int argc, char* argv[])
 
             wait = Send_UDP_Packet(udpsock, &message, 5, &buffer, sizeof(buffer), server_addr, server_addr_len);
 
-            cout << buffer << endl;
             string temp = buffer;
             temp = temp.substr(64, 4);
             secretport1 = stoi(temp);
@@ -413,7 +412,6 @@ int main(int argc, char* argv[])
                 
                 }
             }
-            cout << buffer << endl;
             string temp = buffer;
             temp = temp.substr(72, 5);
             secretport2 = stoi(temp);
@@ -446,18 +444,16 @@ int main(int argc, char* argv[])
             memcpy(packet,&Signature,4);
             memcpy(packet + 4, secretphrase.c_str(), secretphrase.length());
 
-            cout << packet << endl;
-
             while (!s.eof()) 
             {
                 getline(s, knock_port, ',');
                 server_addr.sin_port = htons(stoi(knock_port));
 
                 memset(buffer, 0, sizeof(buffer));
-                wait = Send_UDP_Packet(udpsock, &packet, 4 + secretphrase.length(), &buffer, sizeof(buffer), server_addr, server_addr_len);
+                wait = Send_UDP_Packet(udpsock, packet, 4 + secretphrase.length(), &buffer, sizeof(buffer), server_addr, server_addr_len);
 
-                cout << buffer << endl;
             }
+            cout << buffer;
         }
     }
 }
