@@ -95,7 +95,7 @@ int Calculate_checksum_ipv4(ip* my_header)
 int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum, uint32_t data)
 {
     uint64_t sum = 0;
-    sum += 17;
+    sum += 0x11;
 
     uint32_t srcIp2 = (srcIp >> 16) & 0xFFFF; // top half
     srcIp = srcIp & 0xFFFF;
@@ -124,21 +124,20 @@ int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16
         sum += sumTemp;
         sumTemp = 0;
 
-        sum = (~sum) & 0xFFFF;
-        sum += checksum;
+        uint64_t data = ((~checksum) - sum) & 0xFFFF;
+        uint64_t comparison = sum + data;
+        sumTemp = (comparison >> 16) & 0xFFFF;
+        comparison = comparison & 0xFFFF;
+        comparison += sumTemp;
 
-        // Overflow, again.
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
+        comparison = (~comparison) & 0xFFFF;
 
-        // Overflow, again.
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
+        if (comparison < checksum) // There was a carry on the data, needs to get a +1
+        {
+            data -= checksum - comparison;
+        }
         
-        return sum;
+        return data;
     }
     else if (checksum == 0) // need to find checksum
     {
@@ -174,6 +173,7 @@ int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16
 
         return sum;
     }
+    return 0;
 }
 
 int main(int argc, char* argv[])
@@ -203,6 +203,7 @@ int main(int argc, char* argv[])
     int wait;
 
     int secretport1 = 0;
+    string secretphrase = "";
     int secretport2 = 0;
     struct timeval wait_time;
 
@@ -296,89 +297,95 @@ int main(int argc, char* argv[])
             if (getsockname(udpsock, (struct sockaddr *)&sin, &len) == -1)
                 cout << "Getsockname failed." << endl;
 
-            uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohl(sin.sin_port), ports[i], checksum, 0);
+            uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohs(sin.sin_port), ports[i], checksum, 0);
 
-            char* packet = new char[30];
+            unsigned char* packet = new unsigned char[30];
             memset(packet, 0, 30);
             struct ip *iphdr = (struct ip*)packet;
             struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
 
+            data = htons(data);
+
             iphdr->ip_hl = 5;
             iphdr->ip_v = 4;
             iphdr->ip_tos = 0;
-            iphdr->ip_len = 32;
+            iphdr->ip_len = htons(30);
             iphdr->ip_off = 0;
             iphdr->ip_ttl = 64;
             iphdr->ip_p = IPPROTO_UDP;
             iphdr->ip_dst.s_addr = inet_addr(argv[1]); // Comes out in network byte order
             iphdr->ip_src.s_addr = htonl(ip);
+            iphdr->ip_sum = 0;
 
-            // iphdr->ip_sum = Calculate_ip_checksum(iphdr);
-
-            cout << hex;
-            for (int i = 0; i < 20; i++)
-            {
-                cout << (int)packet[i] << endl;
-            }
-
-            udphdr->check = htonl(checksum);
-            udphdr->dest = htonl(ports[i]);
+            udphdr->check = htons(checksum);
+            udphdr->dest = htons((unsigned int)ports[i]);
             udphdr->source = sin.sin_port; // Comes out in network byte order
-            udphdr->len = 10;
+            udphdr->len = htons(10);
 
             memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &data, 2);
 
             memset(buffer, 0, sizeof(buffer));
-            wait = Send_UDP_Packet(udpsock, &packet, sizeof(packet), &buffer, sizeof(buffer), server_addr, server_addr_len);
-            cout << buffer << endl;
+            wait = Send_UDP_Packet(udpsock, packet, 30, &buffer, sizeof(buffer), server_addr, server_addr_len);
+            secretphrase = buffer;
+            int first_location = secretphrase.find('"');
+            int second_location = secretphrase.find('"', first_location + 1);
+            secretphrase = secretphrase.substr(first_location + 1, second_location - first_location - 1);
         }
 
         if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
         {
-
-            
-            char* packet = new char[32];
+            unsigned char* packet = new unsigned char[32];
             memset(packet, 0, 32);
+            memset(buffer, 0, sizeof(buffer));
+
+            if (getsockname(udpsock, (struct sockaddr *)&server_addr, &server_addr_len) == -1)
+                cout << "Getsockname failed." << endl;
 
             uint32_t reserved_bit_mask = 0x8000;
             struct ip *iphdr;
 
             //Note what ever is larger then one byte NEEDS to be in network byte order
-
             iphdr = (struct ip*)packet;
             iphdr->ip_v = 4;
             iphdr->ip_hl = 5;
-            iphdr->ip_len = htonl(32);
+            iphdr->ip_len = 32;
             iphdr->ip_tos = 0;
             iphdr->ip_id = 0;
             iphdr->ip_off = iphdr->ip_off | reserved_bit_mask;
             iphdr->ip_ttl = 64;
             iphdr->ip_p = IPPROTO_UDP;
             iphdr->ip_dst.s_addr = inet_addr(argv[1]);
-            iphdr->ip_src.s_addr = htonl(server_addr.sin_port);
-            iphdr->ip_sum = Calculate_checksum_ipv4(iphdr);
+            iphdr->ip_src.s_addr = htonl(server_addr.sin_addr.s_addr);
+            iphdr->ip_sum = 0;
 
-            //TODO create udp hdr to send over raw socket.
             struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
-            //uint32_t my_checksum = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohl(sin.sin_port), ports[i], 0, Signature);
 
+            udphdr->dest = htonl(ports[i]);
+            udphdr->source = server_addr.sin_port; // Comes out in network byte order
+            udphdr->len = htons(12);
+            udphdr->check = 0;
 
-            //TODO memcpy the packet with the signiture.
+            memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &Signature, 4);
 
-            memset(buffer, 0, sizeof(buffer));
-
-            
             //TODO create the raw socket so that we can use our own ip and udp headers.
             //NOTE requires root privlage to run !!
             //  sudo ./puzzlesolver ....
+
+            cout << hex;
+            for (int i = 0; i < 32; i++)
+            {
+                cout << (unsigned int)packet[i] << endl;
+            }
+            cout << Signature << endl;
+
             int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
             if(raw_sock < 0)
             {
                 cout << "Error on creating raw socket." << endl;
             }
-            int opt;
-            if(setsockopt(raw_sock,IPPROTO_IP,IP_HDRINCL,&opt,sizeof(opt)) < 0)
-            {
+            int opt = 1;
+            if(setsockopt(raw_sock, IPPROTO_IP, IP_HDRINCL, &opt, sizeof(opt)) < 0)
+            { 
                 cout << "Failed to set socket options" << endl;
             }
             if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
@@ -387,13 +394,13 @@ int main(int argc, char* argv[])
             }
 
             //TODO send & recv data
-            int rsp = sendto(raw_sock,packet,sizeof(packet),0,(sockaddr*)&server_addr, sizeof(server_addr));
+            int rsp = sendto(raw_sock, packet, 32, 0, (sockaddr*)&server_addr, sizeof(server_addr));
             if(rsp > 0)
             {
                 cout << "We got a respone :). Time to see what it says..." << endl;
             }
             
-            //TODO create recv section
+            int recv_len = recvfrom(udpsock, buffer, 1024, 0, (sockaddr*)&server_addr, &server_addr_len);
             cout << endl;
             cout << buffer << endl;
 
