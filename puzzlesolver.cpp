@@ -345,7 +345,6 @@ int main(int argc, char* argv[])
             uint32_t reserved_bit_mask = 0x8000;
             struct ip *iphdr;
 
-            //Note what ever is larger then one byte NEEDS to be in network byte order
             iphdr = (struct ip*)packet;
             iphdr->ip_v = 4;
             iphdr->ip_hl = 5;
@@ -368,11 +367,8 @@ int main(int argc, char* argv[])
 
             memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &Signature, 4);
 
-            //TODO create the raw socket so that we can use our own ip and udp headers.
-            //NOTE requires root privlage to run !!
+            // NOTE requires root privlage to run !!
             //  sudo ./puzzlesolver ....
-
-
 
             int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
             if(raw_sock < 0)
