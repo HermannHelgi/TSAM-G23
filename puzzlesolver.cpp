@@ -419,8 +419,16 @@ int main(int argc, char* argv[])
         }
         if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
         {
-            // Needs to be moved, have to first get secret ports from first and second puzzle.
-            continue;
+
+            string data = to_string(secretport1) + ", " + to_string(secretport2);
+            cout << data << endl;
+            memset(buffer, 0, sizeof(buffer));
+            wait = Send_UDP_Packet(udpsock, &data, sizeof(data), &buffer, sizeof(buffer), server_addr, server_addr_len);
+            
+            cout << buffer << endl;
+
+
+
         }
     }
 }
