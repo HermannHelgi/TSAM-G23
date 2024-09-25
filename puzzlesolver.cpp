@@ -23,6 +23,8 @@ int is_little_endian() {
 
 int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, int buffer_size, sockaddr_in server_addr, socklen_t server_addr_len)
 {
+    // Sends a UDP packet and collects the response. 
+    // If the packet is dropped by the network it resends up to a maximum of 5 times.
     fd_set set;
     int compare;
 
@@ -31,7 +33,7 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
 
     for (int j = 0; j < 5; j++)
     {
-        // Sending an empty UDP packet to server
+        // Sending a UDP packet to server
         int rsp = sendto(udpsock, data, data_len, 0, (sockaddr*)&server_addr, sizeof(server_addr));
 
         if (rsp < 0)
@@ -60,42 +62,10 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
     return 0;
 }
 
-//Returns in network byte order !
-int Calculate_checksum_ipv4(ip* my_header)
-{
-
-    uint32_t sum;
-
-    sum += my_header->ip_v;
-    sum += my_header->ip_hl;
-    sum += my_header->ip_tos;
-
-    sum += my_header->ip_len;
-
-    sum += my_header->ip_id;
-    
-    sum += my_header->ip_off;
-    sum += my_header->ip_ttl;
-
-    //Check if need to carry the front bit
-    if(sum & 0xFFFF0000)
-    {
-        sum = (sum & 0xFFFF) + (sum >> 16);
-    };
-
-    sum += my_header->ip_src.s_addr;
-    if(sum & 0xFFFF0000)
-    {
-        sum = (sum & 0xFFFF) + (sum >> 16);
-    };
-    sum += my_header->ip_dst.s_addr;
-
-
-    return htonl(sum);
-}
-
 int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum, uint32_t data)
 {
+    // Can calculate two different values, a normal checksum if the supplied checksum is 0 (assumes data is 4 bytes then for signature)
+    // And to calculate data from a given checksum, if data is supplies as 0.
     uint64_t sum = 0;
     sum += 0x11;
 
@@ -134,16 +104,17 @@ int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16
 
         comparison = (~comparison) & 0xFFFF;
 
-        if (comparison < checksum) // There was a carry on the data, needs to get a +1
+        if (comparison < checksum) // There was a carry on the data, needs to be reduce from the difference
         {
             data -= checksum - comparison;
         }
-        
+
         return data;
     }
     else if (checksum == 0) // need to find checksum
     {
         // THIS COULD POTENTIALLY LEAD TO BUGS IF DATA IS SMALLER THAN 4 BYTES
+        // IT'S HARDCODED FOR THE ASSIGNMENT
         sum += 12; // Length in pseudo header
         sum += 12; // Length in header
 
@@ -180,6 +151,7 @@ int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16
 
 int main(int argc, char* argv[])
 {
+    // Error check
     if (argc != 6)
     {
         cout << "Wrong number of arguments given." << endl;
@@ -188,6 +160,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    // Taking in port numbers
     int* ports = new int[4];
     ports[0] = atoi(argv[2]);
     ports[1] = atoi(argv[3]);
@@ -195,60 +168,68 @@ int main(int argc, char* argv[])
     ports[3] = atoi(argv[5]);
     char buffer[1024];
 
-    string first_puzzle = "Send me";
-    string second_puzzle = "The dark";
-    string third_puzzle = "Greetings ";
-    string fourth_puzzle = "Greetings!";
+    // Comparison strings
+    string checksum_puzzle = "Send me";
+    string evil_puzzle = "The dark";
+    string secret_puzzle = "Greetings ";
+    string knock_puzzle = "Greetings!";
 
+    // Making server_addr
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    int wait;
+    int wait; // Variable to try and mitigate IO/times for filling up the buffer, kinda doesn't have a purpose except to delay stuff
 
+    // Storable variables
     int secretport1 = 0;
     string secretphrase = "";
     int secretport2 = 0;
-    struct timeval wait_time;
+    uint64_t Signature = 0;
 
+    // Timeout for socket
+    struct timeval wait_time;
     wait_time.tv_sec = 0;
     wait_time.tv_usec = 20000; // 20 ms for each wait.
 
+    // Making UDP socket
     int udpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     setsockopt(udpsock, SOL_SOCKET, SO_RCVTIMEO, &wait_time, sizeof(wait_time));
-    
     if (udpsock < 0)
     {
         cout << "Error on creating UDP socket." << endl;
         return 0;
     }
 
+    // Translating server ip addr from string to decimal
     if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
     {
         cout << "Failed to set socket address." << endl;
         return 0;
     }
 
+    // Size of socket for later function calls
     socklen_t server_addr_len = sizeof(server_addr);
-    uint64_t Signature = 0;
 
     for (int i = 0; i < 4; i++)
-    {
+    { // Searches for S.E.C.R.E.T port to make correct signature.
         server_addr.sin_port = htons(ports[i]);
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, &buffer, sizeof(buffer), server_addr, server_addr_len);
 
-        if (strncmp(buffer, third_puzzle.c_str(), 10) == 0)
+        if (strncmp(buffer, secret_puzzle.c_str(), 10) == 0) // Looking for S.E.C.R.E.T phrase.
         {
             memset(buffer, 0, sizeof(buffer));
-            uint64_t group_number = 0x17;
-            uint32_t group_secret_mask = 0xc9baa9f8;
+
+            // Setting some necessary variables.
+            uint64_t group_number = 0x17; // Hardcoded for assignment
+            uint32_t group_secret_mask = 0xc9baa9f8; // Hardcoded for assignment
             uint64_t response;
             uint64_t message = 0;
 
-            // Don't need to convert group number as it is only a single byte.
-
+            // Don't need to convert group number to network byte order as it is only a single byte.
             wait = Send_UDP_Packet(udpsock, &group_number, 1, &response, sizeof(response), server_addr, server_addr_len);
 
+            // Endian manipulation and bit twiddling, *hopefully* works on a big endian machine.
             group_number = group_number << 32;
             group_number = htobe64(group_number);
             response = ntohl(response);
@@ -261,45 +242,55 @@ int main(int argc, char* argv[])
                 message = message >> 24;
             }
 
+            // Sends signature + group number.
             wait = Send_UDP_Packet(udpsock, &message, 5, &buffer, sizeof(buffer), server_addr, server_addr_len);
 
+            // Collects the secretport.
             string temp = buffer;
             temp = temp.substr(64, 4);
             secretport1 = stoi(temp);
             Signature = be64toh(Signature);
             Signature = htonl(Signature);
+            cout << "First secret port: " << secretport1 << endl;
         }
     }
 
     for (int i = 0; i < 4; i++)
     {
+        // Since we now have the necessary signature, we can do the Evil port and the Checksum port.
         server_addr.sin_port = htons(ports[i]);
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, buffer, sizeof(buffer), server_addr, server_addr_len);
 
-        if (strncmp(buffer, first_puzzle.c_str(), 7) == 0)
+        if (strncmp(buffer, checksum_puzzle.c_str(), 7) == 0) // Checksum port.
         {
             memset(buffer, 0, sizeof(buffer));
+            // Send signature.
             wait = Send_UDP_Packet(udpsock, &Signature, 4, &buffer, sizeof(buffer), server_addr, server_addr_len);
 
+            // Collect data for checksum problem.
             int length_of_message = strlen(buffer);
             uint32_t checksum;
             uint32_t ip;
             memcpy(&checksum, buffer + length_of_message - 6, 2);
             memcpy(&ip, buffer + length_of_message - 4, 4);
         
+            // Endian manipulation
             checksum = ntohl(checksum);
             checksum = checksum >> 16;
             ip = ntohl(ip);
 
+            // Making IPv4 and UDP headers.
             struct sockaddr_in sin;
             socklen_t len = sizeof(sin);
             if (getsockname(udpsock, (struct sockaddr *)&sin, &len) == -1)
                 cout << "Getsockname failed." << endl;
 
+            // Getting data for correct checksum
             uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohs(sin.sin_port), ports[i], checksum, 0);
 
+            // IPv4 header.
             unsigned char* packet = new unsigned char[30];
             memset(packet, 0, 30);
             struct ip *iphdr = (struct ip*)packet;
@@ -318,30 +309,39 @@ int main(int argc, char* argv[])
             iphdr->ip_src.s_addr = htonl(ip);
             iphdr->ip_sum = 0;
 
+            // UDP header.
             udphdr->check = htons(checksum);
             udphdr->dest = htons((unsigned int)ports[i]);
             udphdr->source = sin.sin_port; // Comes out in network byte order
             udphdr->len = htons(10);
 
+            // Data
             memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &data, 2);
 
             memset(buffer, 0, sizeof(buffer));
+            // Sending packet
             wait = Send_UDP_Packet(udpsock, packet, 30, &buffer, sizeof(buffer), server_addr, server_addr_len);
             secretphrase = buffer;
+
+            // Getting secret phrase.
             int first_location = secretphrase.find('"');
             int second_location = secretphrase.find('"', first_location + 1);
             secretphrase = secretphrase.substr(first_location + 1, second_location - first_location - 1);
+            cout << "Secret phrase: " << secretphrase << endl;
         }
 
-        if (strncmp(buffer, second_puzzle.c_str(), 8) == 0)
+        if (strncmp(buffer, evil_puzzle.c_str(), 8) == 0) // Evil port
         {
+
+            // Making IPv4 Header and UDP header.
             unsigned char* packet = new unsigned char[32];
             memset(packet, 0, 32);
             memset(buffer, 0, sizeof(buffer));
 
-            if (getsockname(udpsock, (struct sockaddr *)&server_addr, &server_addr_len) == -1)
+            if (getsockname(udpsock, (struct sockaddr *)&server_addr, &server_addr_len) == -1) // Getting UDP socket port
                 cout << "Getsockname failed." << endl;
 
+            // IPv4
             uint32_t reserved_bit_mask = 0x8000;
             struct ip *iphdr;
 
@@ -358,6 +358,7 @@ int main(int argc, char* argv[])
             iphdr->ip_src.s_addr = htonl(server_addr.sin_addr.s_addr);
             iphdr->ip_sum = 0;
 
+            // UDP header
             struct udphdr *udphdr = (struct udphdr*)(packet + sizeof(struct ip));
 
             udphdr->dest = htons((unsigned int)ports[i]);
@@ -365,10 +366,11 @@ int main(int argc, char* argv[])
             udphdr->len = htons(12);
             udphdr->check = 0;
 
+            // Setting data
             memcpy(packet + sizeof(struct ip) + sizeof(struct udphdr), &Signature, 4);
 
-            // NOTE requires root privlage to run !!
-            //  sudo ./puzzlesolver ....
+            // Making raw socket
+            // NOTE requires root privilage to run! (Sudo)
 
             int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
             if(raw_sock < 0)
@@ -385,6 +387,7 @@ int main(int argc, char* argv[])
                 cout << "Failed to set socket address." << endl;
             }
 
+            // Sending message multiple times in case of packet getting dropped.
             for (int i = 0; i < 5; i++)
             {
 
@@ -408,39 +411,43 @@ int main(int argc, char* argv[])
                 
                 }
             }
+
+            // Getting port.
             string temp = buffer;
             temp = temp.substr(72, 5);
             secretport2 = stoi(temp);
-
+            cout << "Second secret port: " << secretport2 << endl;
         }
 
     }
     
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) // Cycling again through to find Knock puzzle, since all data is gathered.
     {
         server_addr.sin_port = htons(ports[i]);
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, buffer, sizeof(buffer), server_addr, server_addr_len);
 
-        if (strncmp(buffer, fourth_puzzle.c_str(), 10) == 0)
+        if (strncmp(buffer, knock_puzzle.c_str(), 10) == 0) // Knock port comparison
         {
 
+            // Sending ports.
             string data = to_string(secretport1) + "," + to_string(secretport2);
             memset(buffer, 0, sizeof(buffer));
 
             wait = Send_UDP_Packet(udpsock, data.data(), data.length(), &buffer, sizeof(buffer), server_addr, server_addr_len);
             
+            // Setting up knock pattern
             string knock = buffer;
             stringstream s(knock);
-
             string knock_port;
 
+            // Secret phrase + Signature.
             unsigned char* packet = new unsigned char[4 + secretphrase.length()];
             memcpy(packet,&Signature,4);
             memcpy(packet + 4, secretphrase.c_str(), secretphrase.length());
 
-            while (!s.eof()) 
+            while (!s.eof()) // Sending until stringstream finishes.
             {
                 getline(s, knock_port, ',');
                 server_addr.sin_port = htons(stoi(knock_port));

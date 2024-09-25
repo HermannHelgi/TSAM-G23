@@ -13,6 +13,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    // Checking inputs
     if (argc != 4)
     {
         cout << "Missing arguments." << endl;
@@ -21,23 +22,26 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    // Taking ports
     int lowport = atoi(argv[2]);
     int highport = atoi(argv[3]);
-    struct sockaddr_in server_addr;
 
+    // Creating socket with timeout
+    struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
+
+    struct timeval wait_time;
+    wait_time.tv_sec = 0;
+    wait_time.tv_usec = 20000; // 20 ms for each wait.
 
     // Setting own socket.
     int udpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    
+    setsockopt(udpsock, SOL_SOCKET, SO_RCVTIMEO, &wait_time, sizeof(wait_time));
     if (udpsock < 0)
     {
         cout << "Error on creating UDP socket." << endl;
         return 0;
     }
-
-    int flags = fcntl(udpsock, F_GETFL, 0);       // Get current flags
-    fcntl(udpsock, F_SETFL, flags | O_NONBLOCK);  // Set non-blocking flag
 
     // Setting servers IP address.
     if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
@@ -46,67 +50,66 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    fd_set set;
-    struct timeval wait_time;
-    int compare;
-    char recv_buf[1024];  // Buffer to hold incoming messages
+    // Additional Variables
     socklen_t server_addr_len = sizeof(server_addr);
-    bool success = false;
+    char recv_buf[1024];  // Buffer to hold incoming messages
+    int all_ports[4]; // Buffer to store ports
+    int current_index_of_ports = 0;
+    int rsp; // Response check for recv
+    int resend_amount = 5; // Repeats five times, can be set for higher if UDP packets are consistently being dropped.
 
+    for (int i = 0; i < 4; i++)
+    {
+        all_ports[i] = 0;
+    }
+
+    cout << "Starting search." << endl;
+    // Cycles through all ports given.
     for (int i = lowport; i < highport+1; i++)
     {
         memset(recv_buf, 0, sizeof(recv_buf));
-        success = false;
         server_addr.sin_port = htons(i);
-        FD_ZERO(&set);
-        FD_SET(udpsock, &set);
 
-        for (int j = 0; j < 5; j++)
+        if (i == (lowport + highport) / 2) // For clarity.
         {
-            wait_time.tv_sec = 0;
-            wait_time.tv_usec = 20000; // 20 ms for each wait.
-            
-            // Sending an empty UDP packet to server
-            sendto(udpsock, NULL, 0, 0, (sockaddr*)&server_addr, sizeof(server_addr));
+            cout << "Halfway done." << endl;
+        }
 
-            // Select begins checking what compare is, blocks until it either timesout or gets an answer.
-            compare = select(udpsock + 1, &set, NULL, NULL, &wait_time);
-            if (compare < 0)
-            {
-                cout << "Error on select()." << endl;
-                continue;
-            }
-            else if (compare == 0) // Timeout or no response
+        for (int j = 0; j < resend_amount; j++)
+        {
+            // Sending an empty UDP packet to server
+            rsp = sendto(udpsock, NULL, 0, 0, (sockaddr*)&server_addr, sizeof(server_addr));
+
+            // Continues if it doesn't get a proper response within the set timeout.
+            if (rsp < 0)
             {
                 continue;
             }
             else
             {
-                // A response!
+                // A response has been received!
                 int recv_len = recvfrom(udpsock, recv_buf, sizeof(recv_buf), 0, (sockaddr*)&server_addr, &server_addr_len);
 
-                if (recv_len > 0)
+                if (recv_len <= 0)
                 {
-                    // Successfully received a response; port is open
-                    cout << "Port: " << i << endl;
-                    cout << recv_buf << endl;
+                    continue; // Recv failed, try again next cycle.
                 }
                 else
                 {
-                    cout << "recv() failed" << endl;
+                    // Successfully received the response, writing down which port was open.
+                    all_ports[current_index_of_ports] = i;
+                    current_index_of_ports++;
+                    break;
                 }
-                success = true;
-                break;
             }
-
-            FD_ZERO(&set);
-            FD_SET(udpsock, &set);
         }
-
-        if (!success)
-        {
-            cout << "Failed: " << i << endl;
-        }
-        cout << endl;
     }
+
+    // Printing.
+    cout << "Ports: ";
+    for (int i = 0; i < 4; i++)
+    {
+        cout << all_ports[i] << " ";
+    }
+    cout << endl;
 }
