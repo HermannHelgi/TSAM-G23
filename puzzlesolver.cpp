@@ -421,7 +421,7 @@ int main(int argc, char* argv[])
     // The code commented here below is an older version of our ICMP echo request code,
     // We didn't want to bother further on the day of the turn-in, so we've left both pieces of code that may have solved it.
     // We believe the code currently placed in is the one which worked, however if it doesn't work then try commenting out the code below. 
-
+    // (Sorry for the inconvenience).
 
     // // Making IPv4 Header and ICMP header.
     // unsigned char* packet = new unsigned char[38];
@@ -487,7 +487,6 @@ int main(int argc, char* argv[])
     // }
 
     // sendto(raw_sock, packet, 38, 0, (sockaddr*)&server_addr, sizeof(server_addr));
-
 
     
     // Making ICMP header.
