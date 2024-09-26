@@ -13,6 +13,8 @@
 #include <endian.h>
 #include <vector>
 #include <sstream>
+#include <unistd.h>
+#include <netinet/ip_icmp.h>
 
 using namespace std;
 
@@ -56,7 +58,7 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
 int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum)
 {
     // Calculates data from a given checksum.
-    
+
     uint64_t sum = 0;
     sum += 0x11;
 
@@ -167,6 +169,7 @@ int main(int argc, char* argv[])
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, &buffer, sizeof(buffer), server_addr, server_addr_len);
+        sleep(0.5);
 
         if (strncmp(buffer, secret_puzzle.c_str(), 10) == 0) // Looking for S.E.C.R.E.T phrase.
         {
@@ -214,6 +217,7 @@ int main(int argc, char* argv[])
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, buffer, sizeof(buffer), server_addr, server_addr_len);
+        sleep(0.5);
 
         if (strncmp(buffer, checksum_puzzle.c_str(), 7) == 0) // Checksum port.
         {
@@ -379,6 +383,7 @@ int main(int argc, char* argv[])
 
         memset(buffer, 0, sizeof(buffer));
         wait = Send_UDP_Packet(udpsock, NULL, 0, buffer, sizeof(buffer), server_addr, server_addr_len);
+        sleep(0.5);
 
         if (strncmp(buffer, knock_puzzle.c_str(), 10) == 0) // Knock port comparison
         {
@@ -409,6 +414,49 @@ int main(int argc, char* argv[])
 
             }
             cout << buffer;
+            int recv_len = recvfrom(udpsock, buffer, 1024, 0, (sockaddr*)&server_addr, &server_addr_len);
         }
     }
+
+    // Making IPv4 Header and ICMP header.
+    unsigned char* packet = new unsigned char[18];
+    memset(packet, 0, 18);
+    memset(buffer, 0, sizeof(buffer));
+    
+    // ICMP header
+    struct icmp *icmp_hdr = (struct icmp*)(packet);
+
+    icmp_hdr->icmp_type = ICMP_ECHO;  
+    icmp_hdr->icmp_code = 0;
+    icmp_hdr->icmp_cksum = 0; 
+
+    char group_data[10];
+    group_data[0] = '$';
+    group_data[1] = 'g';
+    group_data[2] = 'r';
+    group_data[3] = 'o';
+    group_data[4] = 'u';
+    group_data[5] = 'p';
+    group_data[6] = '_';
+    group_data[7] = '2';
+    group_data[8] = '3';
+    group_data[9] = '$';
+
+    // Setting data
+    memcpy(packet + 8, &group_data, 10);
+
+    // Making raw socket
+    // NOTE requires root privilage to run! (Sudo)
+
+    int raw_sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if(raw_sock < 0)
+    {
+        cout << "Error on creating raw socket." << endl;
+    }
+    if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
+    {
+        cout << "Failed to set socket address." << endl;
+    }
+
+    sendto(raw_sock, packet, 18, 0, (sockaddr*)&server_addr, sizeof(server_addr));
 }
