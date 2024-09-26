@@ -419,15 +419,33 @@ int main(int argc, char* argv[])
     }
 
     // Making IPv4 Header and ICMP header.
-    unsigned char* packet = new unsigned char[18];
-    memset(packet, 0, 18);
+    unsigned char* packet = new unsigned char[38];
+    memset(packet, 0, 38);
     memset(buffer, 0, sizeof(buffer));
     
+    // IPv4
+    struct ip *iphdr;
+
+    iphdr = (struct ip*)packet;
+    iphdr->ip_v = 4;
+    iphdr->ip_hl = 5;
+    iphdr->ip_len = htons(38);
+    iphdr->ip_tos = 0;
+    iphdr->ip_id = 0;
+    iphdr->ip_off = htons(iphdr->ip_off);
+    iphdr->ip_ttl = 64;
+    iphdr->ip_p = IPPROTO_ICMP;
+    iphdr->ip_dst.s_addr = inet_addr(argv[1]);
+    iphdr->ip_src.s_addr = htonl(server_addr.sin_addr.s_addr);
+    iphdr->ip_sum = 0;
+
     // ICMP header
-    struct icmp *icmp_hdr = (struct icmp*)(packet);
+    struct icmp *icmp_hdr = (struct icmp*)(packet + sizeof(struct ip));
 
     icmp_hdr->icmp_type = ICMP_ECHO;  
     icmp_hdr->icmp_code = 0;
+    icmp_hdr->icmp_id = htons(getpid());  
+    icmp_hdr->icmp_seq = htons(0);
     icmp_hdr->icmp_cksum = 0; 
 
     char group_data[10];
@@ -443,7 +461,7 @@ int main(int argc, char* argv[])
     group_data[9] = '$';
 
     // Setting data
-    memcpy(packet + 8, &group_data, 10);
+    memcpy(packet + sizeof(struct ip) + 8, &group_data, 10);
 
     // Making raw socket
     // NOTE requires root privilage to run! (Sudo)
@@ -453,10 +471,15 @@ int main(int argc, char* argv[])
     {
         cout << "Error on creating raw socket." << endl;
     }
+    int opt = 1;
+    if(setsockopt(raw_sock, IPPROTO_IP, IP_HDRINCL, &opt, sizeof(opt)) < 0)
+    { 
+        cout << "Failed to set socket options" << endl;
+    }
     if (inet_pton(AF_INET, argv[1], &server_addr.sin_addr) <= 0)
     {
         cout << "Failed to set socket address." << endl;
     }
 
-    sendto(raw_sock, packet, 18, 0, (sockaddr*)&server_addr, sizeof(server_addr));
+    sendto(raw_sock, packet, 38, 0, (sockaddr*)&server_addr, sizeof(server_addr));
 }
