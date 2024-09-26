@@ -18,3 +18,4 @@ Both of the executables should be ran as described in the assignment description
 
 There are some bugs that can take place with the puzzle solver. It is a rare issue, but can happen.
 We were not able to find the root of the issue and we assume it to be the fault of slow I/O times leading to our puzzle solver for loops receiving a message from a port, the data not being sent to the buffer until one cycle of if sentences are passed, and the port AFTER that desired port being registered as the "right port" to access.
+This leads to the operation necessary to solve a certain port being performed on the wrong port, leading to bugs. We reccommend simply running the code a second time or third time and it should hopefull work.

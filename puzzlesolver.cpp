@@ -25,12 +25,6 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
 {
     // Sends a UDP packet and collects the response. 
     // If the packet is dropped by the network it resends up to a maximum of 5 times.
-    fd_set set;
-    int compare;
-
-    FD_ZERO(&set);
-    FD_SET(udpsock, &set);
-
     for (int j = 0; j < 5; j++)
     {
         // Sending a UDP packet to server
@@ -54,18 +48,15 @@ int Send_UDP_Packet(int udpsock, const void* data, int data_len, void* buffer, i
                 break;
             }
         }
-
-        FD_ZERO(&set);
-        FD_SET(udpsock, &set);
     }
 
     return 0;
 }
 
-int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum, uint32_t data)
+int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16_t destPort, uint16_t checksum)
 {
-    // Can calculate two different values, a normal checksum if the supplied checksum is 0 (assumes data is 4 bytes then for signature)
-    // And to calculate data from a given checksum, if data is supplies as 0.
+    // Calculates data from a given checksum.
+    
     uint64_t sum = 0;
     sum += 0x11;
 
@@ -80,73 +71,34 @@ int Calculate_Checksum(uint32_t srcIp, uint32_t destIp, uint32_t srcPort, uint16
     sum += destPort;
     sum += srcPort;
 
-    if (data == 0) // Need to find data
+    sum += 10; // Length in pseudo header
+    sum += 10; // Length in header
+
+    uint32_t sumTemp = (sum >> 16) & 0xFFFF;
+    sum = sum & 0xFFFF;
+    sum += sumTemp;
+    sumTemp = 0;
+
+    // Could potentially overflow from the carry-bit, safety check.
+    sumTemp = (sum >> 16) & 0xFFFF;
+    sum = sum & 0xFFFF;
+    sum += sumTemp;
+    sumTemp = 0;
+
+    uint64_t data = ((~checksum) - sum) & 0xFFFF;
+    uint64_t comparison = sum + data;
+    sumTemp = (comparison >> 16) & 0xFFFF;
+    comparison = comparison & 0xFFFF;
+    comparison += sumTemp;
+
+    comparison = (~comparison) & 0xFFFF;
+
+    if (comparison < checksum) // There was a carry on the data, needs to be reduce from the difference
     {
-        sum += 10; // Length in pseudo header
-        sum += 10; // Length in header
-
-        uint32_t sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
-
-        // Could potentially overflow from the carry-bit, safety check.
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
-
-        uint64_t data = ((~checksum) - sum) & 0xFFFF;
-        uint64_t comparison = sum + data;
-        sumTemp = (comparison >> 16) & 0xFFFF;
-        comparison = comparison & 0xFFFF;
-        comparison += sumTemp;
-
-        comparison = (~comparison) & 0xFFFF;
-
-        if (comparison < checksum) // There was a carry on the data, needs to be reduce from the difference
-        {
-            data -= checksum - comparison;
-        }
-
-        return data;
+        data -= checksum - comparison;
     }
-    else if (checksum == 0) // need to find checksum
-    {
-        // THIS COULD POTENTIALLY LEAD TO BUGS IF DATA IS SMALLER THAN 4 BYTES
-        // IT'S HARDCODED FOR THE ASSIGNMENT
-        sum += 12; // Length in pseudo header
-        sum += 12; // Length in header
-
-        uint32_t sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
-
-        // Could potentially overflow from the carry-bit, safety check.
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
-
-        sum += (data >> 16) & 0xFFFF;
-        sum += data & 0xFFFF;
-
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-        sumTemp = 0;
-
-        // Could potentially overflow from the carry-bit, safety check.
-        sumTemp = (sum >> 16) & 0xFFFF;
-        sum = sum & 0xFFFF;
-        sum += sumTemp;
-
-        sum = (~sum) & 0xFFFF;
-
-        return sum;
-    }
-    return 0;
+    
+    return data;
 }
 
 int main(int argc, char* argv[])
@@ -288,7 +240,7 @@ int main(int argc, char* argv[])
                 cout << "Getsockname failed." << endl;
 
             // Getting data for correct checksum
-            uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohs(sin.sin_port), ports[i], checksum, 0);
+            uint32_t data = Calculate_Checksum(ip, ntohl(inet_addr(argv[1])), ntohs(sin.sin_port), ports[i], checksum);
 
             // IPv4 header.
             unsigned char* packet = new unsigned char[30];
