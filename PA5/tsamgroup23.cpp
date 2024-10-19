@@ -1,10 +1,3 @@
-//
-// Simple chat server for TSAM-409
-//
-// Command line: ./chat_server 4000 
-//
-// Author: Jacky Mallett (jacky@ru.is)
-//
 #include <stdio.h>
 #include <cstdio>
 #include <errno.h>
@@ -41,9 +34,32 @@
 
 using namespace std;
 
+void LogError(string message)
+{
+    // Making time stamp
+    char timebuffer[64];
+    time_t timestamp = time(NULL);
+    struct tm* localTime = localtime(&timestamp);
+    strftime(timebuffer, sizeof(timebuffer), "[%Y-%m-%d %H:%M:%S] ", localTime);
+
+    cerr << timebuffer;
+    cerr << message << endl;
+}
+
+void Log(string message)
+{
+    // Making time stamp
+    char timebuffer[64];
+    time_t timestamp = time(NULL);
+    struct tm* localTime = localtime(&timestamp);
+    strftime(timebuffer, sizeof(timebuffer), "[%Y-%m-%d %H:%M:%S] ", localTime);
+
+    cout << timebuffer;
+    cout << message << endl;
+}
+
 // Open socket for specified port.
 // Returns -1 if unable to create the socket for any reason.
-
 int open_socket(int portno)
 {
    struct sockaddr_in sk_addr;   // address settings for bind()
@@ -140,41 +156,82 @@ int CheckClientPassword(char buffer[], string password, int &clientSock, int soc
     return -1;
 }
 
-int ServerCommand(char buffer[])
+void StripServerMessage(char buffer[], int message_length, string &command, vector<string> &variables)
+{
+    string main = buffer + '\0';
+    string buffered_string = buffer + '\0';
+    cout << message_length << endl;
+    if (buffer[0] == '\x01')
+    {
+        main = buffered_string.substr(1);
+        size_t find_EOT = main.find('\x04');
+        if (find_EOT != string::npos)
+        {
+            main = main.substr(0, find_EOT);
+        }
+        else
+        {
+            LogError("// MESSAGE // Missing EOT Symbol.");
+        }
+    }
+    else
+    {
+        LogError("// MESSAGE // Missing SOH Symbol.");
+        size_t find_EOT = main.find('\x04');
+        if (find_EOT != string::npos)
+        {
+            main = buffered_string.substr(0, find_EOT);
+        }
+        else
+        {
+            LogError("// MESSAGE // Missing EOT Symbol.");
+        }
+    }
+
+    size_t old_comma_index = 0;
+    size_t comma_index = main.find(',');
+    if (comma_index != string::npos)
+    {
+        command = main.substr(0, comma_index);
+        while (comma_index != string::npos)
+        {
+            old_comma_index = comma_index;
+            comma_index = main.find(',', (old_comma_index+1));
+            variables.emplace_back(main.substr(old_comma_index+1, comma_index));
+            if (comma_index != std::string::npos) 
+            {
+                variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+            } 
+            else 
+            {
+                variables.emplace_back(main.substr(old_comma_index + 1));
+            }
+        }
+    }
+    else
+    {
+        command = main;
+    }
+}
+
+int ServerCommand(char buffer[], int message_length)
 {
     // TODO
-    string message = buffer;
-
+    string command;
+    vector<string> variables;
+    StripServerMessage(buffer, message_length, command, variables);
+    
+    cout << command << endl;
+    for (int i = 0; i < variables.size(); i++)
+    {
+        cout << variables[i] << endl;
+    }
 
 
     // If message is not recognized:
 
     // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
     return -1;
-}
-
-void LogError(string message)
-{
-    // Making time stamp
-    char timebuffer[64];
-    time_t timestamp = time(NULL);
-    struct tm* localTime = localtime(&timestamp);
-    strftime(timebuffer, sizeof(timebuffer), "[%Y-%m-%d %H:%M:%S] ", localTime);
-
-    cerr << timebuffer;
-    cerr << message << endl;
-}
-
-void Log(string message)
-{
-    // Making time stamp
-    char timebuffer[64];
-    time_t timestamp = time(NULL);
-    struct tm* localTime = localtime(&timestamp);
-    strftime(timebuffer, sizeof(timebuffer), "[%Y-%m-%d %H:%M:%S] ", localTime);
-
-    cout << timebuffer;
-    cout << message << endl;
 }
 
 int main(int argc, char* argv[])
@@ -194,7 +251,8 @@ int main(int argc, char* argv[])
     struct sockaddr_in client;
     socklen_t clientLen;
     
-    char buffer[1025];              // buffer for reading from clients
+    char buffer[5121];              // buffer for reading from clients
+    int buffer_size = 5120;
     vector<pollfd> file_descriptors;
     vector<string> connection_names;
 
@@ -265,7 +323,7 @@ int main(int argc, char* argv[])
                     else
                     {
                         Log(string("// MESSAGE // New message received from: " + to_string(file_descriptors[i].fd)));
-                        int valread = recv(file_descriptors[i].fd, buffer, 1024, MSG_DONTWAIT);
+                        int valread = recv(file_descriptors[i].fd, buffer, buffer_size, MSG_DONTWAIT);
 
                         if (valread <= 0) 
                         {
@@ -295,7 +353,7 @@ int main(int argc, char* argv[])
                             else
                             {
                                 Log(string("// COMMAND // New command from Server: " + to_string(file_descriptors[i].fd)));
-                                int val = ServerCommand(buffer);
+                                int val = ServerCommand(buffer, valread);
 
                                 if (val == -1 && clientSock == INT32_MAX) // Might be client trying to connect.
                                 {
