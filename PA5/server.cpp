@@ -63,6 +63,7 @@ int Server::CheckMessages()
 
                     if (valread <= 0) 
                     {
+                        // TODO: NEED TO REMOVE NAMES FROM MAP AND VECTOR
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
@@ -89,17 +90,17 @@ int Server::CheckMessages()
                         else
                         {
                             Log(string("// COMMAND // New command from Server: " + to_string(file_descriptors[i].fd)));
-                            int val = ReceiveServerCommand(valread);
+                            int val = ReceiveServerCommand(valread, file_descriptors[i].fd);
 
                             if (val == -1 && clientSock == INT32_MAX) // Might be client trying to connect.
                             {
-                                Log(string("// UNKNOWN // Unknown command from Server, checking for client password: " + to_string(file_descriptors[i].fd)));
+                                Log(string("// UNKNOWN // Failed to process command from Server, checking for client password: " + to_string(file_descriptors[i].fd)));
                                 val = CheckClientPassword(client_password, clientSock, file_descriptors[i].fd);
 
                                 // Just an Unknown message
                                 if (val == -1)
                                 {
-                                    LogError(string("// UNKNOWN // Unknown command from server: " + to_string(file_descriptors[i].fd)));
+                                    LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                     LogError(string(buffer));
                                     send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
                                 }
@@ -113,7 +114,7 @@ int Server::CheckMessages()
                             }
                             else
                             {
-                                LogError(string("// UNKNOWN // Unknown command from server: " + to_string(file_descriptors[i].fd)));
+                                LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                 LogError(string(buffer));
                                 send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
                             }
@@ -280,7 +281,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
     return -1;
 }
 
-int Server::ReceiveServerCommand(int message_length)
+int Server::ReceiveServerCommand(int message_length, int fd)
 {
     string command;
     vector<string> variables;
@@ -289,16 +290,7 @@ int Server::ReceiveServerCommand(int message_length)
     if (command == "HELO")
     {
         Log(string("// COMMAND // HELO detected. Taking in data."));
-        if (variables.size() == 3)
-        {
-            list_of_connections[variables[0]] = {variables[1], stoi(variables[2])};
-            // TODO: Should respond with SERVERS command.
-        }
-        else
-        {
-            LogError(string("// COMMAND // Not correct amount of variables in HELO command. Aborting."));
-            return -1;
-        }
+        return RespondHELO(fd, variables);
     }
     else if (command == "SERVERS")
     {
@@ -308,13 +300,13 @@ int Server::ReceiveServerCommand(int message_length)
     }
     else if (command == "KEEPALIVE")
     {
-        // TODO
-        // LOG
+        Log(string("// COMMAND // KEEPALIVE detected. Taking in data."));
+        return RespondKEEPALIVE(fd, variables);
     }
     else if (command == "GETMSGS")
     {
-        // TODO
-        // LOG
+        Log(string("// COMMAND // GETMSGS detected. Sending data."));
+        return RespondGETMSG(fd, variables);
     }
     else if (command == "SENDMSG")
     {
@@ -323,9 +315,8 @@ int Server::ReceiveServerCommand(int message_length)
     }
     else if (command == "STATUSREQ")
     {
-        // TODO
-        // Should respond with a STATUSRESP message.
-        // LOG
+        Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
+        return SendSTATUSRESP(fd);
     }
     else if (command == "STATUSRESP")
     {
@@ -338,6 +329,83 @@ int Server::ReceiveServerCommand(int message_length)
         return -1;
     }
 }
+
+int Server::RespondGETMSG(int fd, vector<string> variables)
+{
+    if (variables.size() >= 1)
+    {
+        Log(string("// COMMAND // Too few variables in GETMSG command. Aborting."));
+        for (int i = 0; i < variables.size(); i++)
+        {
+            if (other_groups_message_buffer.find(variables[i]) != other_groups_message_buffer.end())
+            {
+                for (int j = 0; j < other_groups_message_buffer[variables[i]].size(); j++)
+                {
+                    //              TO_GROUP      FROM_GROUP                                          DATA 
+                    SendSENDMSG(fd, variables[i], other_groups_message_buffer[variables[i]][j].first, other_groups_message_buffer[variables[i]][j].second);
+                    // Doesn't matter if it fails methinks
+                }
+            }
+        }
+    }
+    else
+    {
+        LogError(string("// COMMAND // Too few variables in GETMSG command. Aborting."));
+        return -1;
+    }
+}
+
+int Server::RespondHELO(int fd, vector<string> variables)
+{
+    if (variables.size() == 1)
+    {
+        connection_names.emplace_back(variables[0]);
+        struct sockaddr_in sin;
+        socklen_t len = sizeof(sin);
+        if (getpeername(fd, (struct sockaddr*)&sin, &len) < 0)
+        {
+            LogError("// SYSTEM // GetPeerName Function failed.");
+            return -1;
+        }
+        else
+        {
+            string ip_address;
+            inet_ntop(AF_INET, &(sin.sin_addr), ip_address.data(), INET_ADDRSTRLEN);
+            list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
+            Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
+        }
+
+        return SendSERVERS(fd);
+    }
+    else
+    {
+        LogError(string("// COMMAND // Not correct amount of variables in HELO command. Aborting."));
+        return -1;
+    }
+}
+
+int Server::RespondKEEPALIVE(int fd, vector<string> variables)
+{
+    if (variables.size() == 1)
+    {
+        if (stoi(variables[0]) > 0)
+        {
+            Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " has messages. Collecting. ");
+            return SendGETMSGS(fd, group_name);
+        }
+        else
+        {
+            Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " is empty. ");
+            return 0;
+        }
+    }
+    else
+    {
+        LogError(string("// COMMAND // Not correct amount of variables in KEEPALIVE command. Aborting."));
+        return -1;
+    }
+}
+
 
 //Sends a list servers to the given file_descriptor
 int Server::SendSERVERS(int fd)
