@@ -66,18 +66,17 @@ public:
     
     int RespondHELO(int fd, vector<string> variables);
     int RespondKEEPALIVE(int fd, vector<string> variables);
-    int RespondGETMSG(int fd, vector<string> variables);
+    int RespondGETMSGS(int fd, vector<string> variables);
 
-    int SendHELO();
+    int SendHELO(int fd);
     int SendSERVERS(int fd);
     int SendKEEPALIVE();
-    int SendGETMSGS(int fd, string group_name);
+    int SendGETMSG(int fd, string group_name);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ();
     int SendSTATUSRESP(int fd);
 
     
-
 
     int listenSock;                 // Socket for connections to server
     int portnum;
@@ -100,6 +99,9 @@ public:
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
     map<string, vector<string>> our_message_buffer; // Stores messages for ourselves.
+    map<int, bool> helo_received;
+    map<int, string> fd_to_group_name; 
+    map<string, int> group_name_to_fd; 
 
     string group_name = "A5_23";
     string client_password;                // Responses and basic strings.
