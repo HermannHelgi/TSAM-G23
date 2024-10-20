@@ -339,6 +339,29 @@ int Server::ReceiveServerCommand(int message_length)
     }
 }
 
+//Sends a list servers to the given file_descriptor
+int Server::SendSERVERS(int fd)
+{
+    char send_buffer[5121];
+    size_t pos = 0;
+    for (const auto& group_server : Server::list_of_connections) 
+    {
+        string group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
+        strcat(send_buffer,group_info.c_str());
+    }
+    if(send(fd,send_buffer,sizeof(send_buffer),0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send list of servers"));
+        return -1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Succeeded in sending list of servers"));
+        return 1;
+    }
+}
+
+
 // Process command from client on the server
 void Server::ReceiveClientCommand()
 {
@@ -358,8 +381,8 @@ void Server::ReceiveClientCommand()
     }
     else if (message.substr(0, 10) == "LISTSERVERS")
     {
-        // LOG
-        // TODO
+        Log(string("// COMMAND // Attempting to list of servers to client"));
+        RespondLISTSERVERS();
 
     }
     else // Unknown
@@ -367,4 +390,12 @@ void Server::ReceiveClientCommand()
         // LOG
         LogError(string("// CLIENT // Unknown command from client."));
     }
+}
+
+int Server::RespondLISTSERVERS()
+{
+
+    //We can just reuse our servers function for this
+    return SendSERVERS(clientSock);
+
 }

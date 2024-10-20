@@ -31,8 +31,18 @@
 
 using namespace std;
 
-// MESSAGE TAGS:
+// MESSAGE TAGS FOR LOGS:
 // SYSTEM - CONNECT, MESSAGE, CLIENT, DISCONNECT, COMMAND, UNKNOWN
+
+//SYSTEM: For if some function that the server relies on fails, Example binding a socket 
+//CONNECT: Logs Relating to attempting connection
+//MESSAGE: Something has been recived and needs to be parsed
+//CLIENT: Logs specificly related to the client
+//DISCONNECT: If a disconnect occurs
+//COMMAND; Relating to commands (fails or succesful executions)
+//UNKNOWN: essentaily misc, if something unknown or unexpected happens
+
+
 
 class Server
 {
@@ -54,13 +64,19 @@ public:
     void ReceiveClientCommand();
     int ReceiveServerCommand(int message_length);
     
+    //Server commands
     int SendHELO();
-    int SendSERVERS();
+    int SendSERVERS(int fd);
     int SendKEEPALIVE();
     int SendGETMSGS();
     int SendSENDMSG();
     int SendSTATUSREQ();
     int SendSTATUSRESP();
+
+    //Client commands
+    int RespondLISTSERVERS();
+    int RespondGETMSG();
+    int RespondSENDMSG();
 
 
     int listenSock;                 // Socket for connections to server
@@ -80,7 +96,7 @@ public:
     char buffer[5121];              // buffer for reading from clients
     int buffer_size = 5120;
     vector<pollfd> file_descriptors;
-    vector<string> connection_names;
+    vector<string> connection_names; //String of group names/nr that are connected to.
     map<string, pair<string, int>> list_of_connections;
     map<string, vector<string>> message_buffer; // Stores messages for groups.
 
