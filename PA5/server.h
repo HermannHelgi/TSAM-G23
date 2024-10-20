@@ -61,7 +61,7 @@ public:
     int CheckClientPassword(string password, int &clientSock, int socketNum);
 
     // May wanna change this to simply be each individual command/message
-    void ReceiveClientCommand();
+    int ReceiveClientCommand();
     int ReceiveServerCommand(int message_length, int fd);
     
     int RespondHELO(int fd, vector<string> variables);
@@ -76,10 +76,7 @@ public:
     int SendSTATUSREQ();
     int SendSTATUSRESP(int fd);
 
-    //Client commands
-    int RespondLISTSERVERS();
-    int RespondGETMSG();
-    int RespondSENDMSG();
+    
 
 
     int listenSock;                 // Socket for connections to server

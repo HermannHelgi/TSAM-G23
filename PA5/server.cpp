@@ -311,7 +311,16 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     else if (command == "SENDMSG")
     {
         // TODO
-        // LOG
+        Log(string("// COMMAND // SENDMSG detected. Sending data"));
+        if(variables.size() == 3)
+        {
+            return SendSENDMSG(fd,variables[0],variables[1],variables[2]);
+        }
+        else
+        {
+            LogError("// COMMAND// SENDMSG has inncorrect ammount of variables");
+            return -1;
+        }
     }
     else if (command == "STATUSREQ")
     {
@@ -329,6 +338,51 @@ int Server::ReceiveServerCommand(int message_length, int fd)
         return -1;
     }
 }
+
+int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
+{
+    char send_buffer[5121];
+    
+    //Begin by storing the message.
+    if(to_group_name == group_name) // The msg is addressed to us
+    {
+        our_message_buffer[from_group_name].push_back(data); //Store in private buffer
+        Log(string("// COMMAND // Message is addressed to us. Process complete"));
+        return 1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Message is addressed to someone else. Storing then checking connection of recpiant"));
+        other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
+    }
+
+    //check if to_group_name is connected
+    if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
+    {
+        //missing map of group_name_to_fd :/
+        Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
+        if(true)
+        {
+            Log(string("// COMMAND // Succeeded sending message to group: " + to_group_name));
+            return 1;
+        }
+        else
+        {
+            LogError(string("// COMMAND // Failed sending massge to group: " + to_group_name));
+            Log(string("// COMMAND // Storring message"));
+            return -1;
+        }
+    }
+    else
+    {
+        LogError(string("// COMMAND // Not connected to group: " + to_group_name));
+        return -1; //Stored succedeed but stil return -1 ???
+        
+    }
+
+
+}
+
 
 int Server::RespondGETMSG(int fd, vector<string> variables)
 {
@@ -431,7 +485,7 @@ int Server::SendSERVERS(int fd)
 
 
 // Process command from client on the server
-void Server::ReceiveClientCommand()
+int Server::ReceiveClientCommand()
 {
     string message = buffer;
 
@@ -443,14 +497,16 @@ void Server::ReceiveClientCommand()
     }
     else if (message.substr(0, 7) == "SENDMSG")
     {
-        // LOG
+        Log(string("// COMMAND // Attempting to send a message"));
         // TODO
 
     }
     else if (message.substr(0, 10) == "LISTSERVERS")
     {
         Log(string("// COMMAND // Attempting to list of servers to client"));
-        RespondLISTSERVERS();
+        //We can just reuse our servers function for this
+        return SendSERVERS(clientSock); 
+
 
     }
     else // Unknown
@@ -458,12 +514,4 @@ void Server::ReceiveClientCommand()
         // LOG
         LogError(string("// CLIENT // Unknown command from client."));
     }
-}
-
-int Server::RespondLISTSERVERS()
-{
-
-    //We can just reuse our servers function for this
-    return SendSERVERS(clientSock);
-
 }
