@@ -72,7 +72,7 @@ public:
     int SendSERVERS(int fd);
     int SendKEEPALIVE();
     int SendGETMSGS(int fd, string group_name);
-    int SendSENDMSG(int fs, string to_group_name, string from_group_name, string data);
+    int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ();
     int SendSTATUSRESP(int fd);
 
