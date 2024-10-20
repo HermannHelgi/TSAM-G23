@@ -24,32 +24,6 @@
 
 #include <unistd.h>
 
-#include <stdio.h>
-#include <cstdio>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <algorithm>
-#include <map>
-#include <vector>
-#include <list>
-#include <poll.h>
-
-#include <iostream>
-#include <sstream>
-#include <thread>
-#include <map>
-
-#include <unistd.h>
-
 #ifndef SOCK_NONBLOCK
 #include <fcntl.h>
 #define SOCK_NONBLOCK O_NONBLOCK
