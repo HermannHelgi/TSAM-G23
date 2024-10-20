@@ -25,8 +25,7 @@ int Server::InitializeServer()
 
 int Server::CheckMessages()
 {
-
-
+    ClearBuffer();
     // Get modifiable copy of readSockets
     // Look at sockets and see which ones have something to be read()
     int n = poll(file_descriptors.data(), file_descriptors.size(), timeout);
@@ -217,7 +216,6 @@ void Server::StripServerMessage(int message_length, string &command, vector<stri
 {
     string main = buffer + '\0';
     string buffered_string = buffer + '\0';
-    cout << message_length << endl;
     if (buffer[0] == '\x01')
     {
         main = buffered_string.substr(1);

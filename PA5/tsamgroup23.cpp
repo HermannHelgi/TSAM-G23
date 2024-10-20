@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     int check = main_server.InitializeServer();
     if (check == -1)
     {
-        return;
+        return 1;
     }
 
     bool finished = false;
