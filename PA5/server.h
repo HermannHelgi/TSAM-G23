@@ -52,15 +52,19 @@ public:
 
     // May wanna change this to simply be each individual command/message
     void ReceiveClientCommand();
-    int ReceiveServerCommand(int message_length);
+    int ReceiveServerCommand(int message_length, int fd);
     
+    int RespondHELO(int fd, vector<string> variables);
+    int RespondKEEPALIVE(int fd, vector<string> variables);
+    int RespondGETMSG(int fd, vector<string> variables);
+
     int SendHELO();
-    int SendSERVERS();
+    int SendSERVERS(int fd);
     int SendKEEPALIVE();
-    int SendGETMSGS();
-    int SendSENDMSG();
+    int SendGETMSGS(int fd, string group_name);
+    int SendSENDMSG(int fs, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ();
-    int SendSTATUSRESP();
+    int SendSTATUSRESP(int fd);
 
 
     int listenSock;                 // Socket for connections to server
@@ -81,9 +85,11 @@ public:
     int buffer_size = 5120;
     vector<pollfd> file_descriptors;
     vector<string> connection_names;
-    map<string, pair<string, int>> list_of_connections;
-    map<string, vector<string>> message_buffer; // Stores messages for groups.
+    map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
+    map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
+    map<string, vector<string>> our_message_buffer; // Stores messages for ourselves.
 
+    string group_name = "A5_23";
     string client_password;                // Responses and basic strings.
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";

@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    cout << "Server connected, please type the password:" << endl;
+    cout << "Server connected, please type a message:" << endl;
     string message_intake;
 
     while (true)
