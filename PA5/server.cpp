@@ -84,12 +84,12 @@ int Server::CheckMessages()
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // New command from Client: " + to_string(file_descriptors[i].fd)));
-                            ClientCommand();
+                            ReceiveClientCommand();
                         }
                         else
                         {
                             Log(string("// COMMAND // New command from Server: " + to_string(file_descriptors[i].fd)));
-                            int val = ServerCommand(valread, list_of_connections);
+                            int val = ReceiveServerCommand(valread);
 
                             if (val == -1 && clientSock == INT32_MAX) // Might be client trying to connect.
                             {
@@ -280,13 +280,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
     return -1;
 }
 
-int Server::SendServerCommand()
-{
-    // TODO
-    // Should send messages to specified servers.
-}
-
-int Server::ServerCommand(int message_length, map<string, pair<string, int>> &list_of_connections)
+int Server::ReceiveServerCommand(int message_length)
 {
     string command;
     vector<string> variables;
@@ -346,7 +340,7 @@ int Server::ServerCommand(int message_length, map<string, pair<string, int>> &li
 }
 
 // Process command from client on the server
-void Server::ClientCommand()
+void Server::ReceiveClientCommand()
 {
     string message = buffer;
 

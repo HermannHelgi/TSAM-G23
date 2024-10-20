@@ -51,10 +51,18 @@ public:
     int CheckClientPassword(string password, int &clientSock, int socketNum);
 
     // May wanna change this to simply be each individual command/message
-    void ClientCommand();
-    int SendServerCommand();
-    int ServerCommand(int message_length, map<string, pair<string, int>> &list_of_connections);
+    void ReceiveClientCommand();
+    int ReceiveServerCommand(int message_length);
     
+    int SendHELO();
+    int SendSERVERS();
+    int SendKEEPALIVE();
+    int SendGETMSGS();
+    int SendSENDMSG();
+    int SendSTATUSREQ();
+    int SendSTATUSRESP();
+
+
     int listenSock;                 // Socket for connections to server
     int portnum;
     int timeout = 50;               // Timeout for Poll()
