@@ -101,7 +101,7 @@ int Server::CheckMessages()
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // New command from Client: " + to_string(file_descriptors[i].fd)));
-                            int val = ReceiveClientCommand();
+                            int val = ReceiveClientCommand(valread);
                             if (val == -1)
                             {
                                 send(clientSock, errorMessage.data(), errorMessage.size(), 0);
@@ -338,7 +338,16 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     else if (command == "SENDMSG" && helo_received[fd])
     {
         // TODO
-        // LOG
+        Log(string("// COMMAND // SENDMSG detected. Sending data"));
+        if(variables.size() == 3)
+        {
+            return SendSENDMSG(fd,variables[0],variables[1],variables[2]);
+        }
+        else
+        {
+            LogError("// COMMAND// SENDMSG has inncorrect ammount of variables");
+            return -1;
+        }
     }
     else if (command == "STATUSREQ" && helo_received[fd])
     {
@@ -356,6 +365,47 @@ int Server::ReceiveServerCommand(int message_length, int fd)
         return -1;
     }
 }
+
+int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
+{
+    char send_buffer[5121];
+    //Begin by storing the message.
+    if(to_group_name == group_name) // The msg is addressed to us
+    {
+        our_message_buffer[from_group_name].push_back(data); //Store in private buffer
+        Log(string("// COMMAND // Message is addressed to us. Storing message."));
+        return 1;
+    }
+    else
+    {
+        //check if to_group_name is connected
+        if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
+        {
+            Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
+            strcat(buffer,data.c_str());
+            if(send(group_name_to_fd[to_group_name],buffer,sizeof(buffer),0) < 0)
+            {
+                LogError(string("// COMMAND // Failed sending massge to group: " + to_group_name));
+                Log(string("// COMMAND // Storring message"));
+                other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
+                return -1;
+            }
+            else
+            {
+                Log(string("// COMMAND // Succeeded sending message to group: " + to_group_name));
+                return -1;
+            }
+        }
+        else
+        {
+            //TODO can't find the server
+        }
+    }
+
+
+}
+
+
 
 int Server::RespondGETMSGS(int fd, vector<string> variables)
 {
@@ -389,10 +439,6 @@ int Server::SendSTATUSRESP(int fd)
     return 1;
 }
 
-int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
-{
-    return 1;
-}
 
 int Server::RespondHELO(int fd, vector<string> variables)
 {
@@ -476,9 +522,11 @@ int Server::SendSERVERS(int fd)
 }
 
 // Process command from client on the server
-int Server::ReceiveClientCommand()
+int Server::ReceiveClientCommand(int message_length)
 {
-    string message = buffer;
+    vector<string> variables;
+    string message;
+    StripServerMessage(message_length, message, variables);
 
     if (message.substr(0, 6) == "GETMSG")
     {
@@ -488,14 +536,23 @@ int Server::ReceiveClientCommand()
     }
     else if (message.substr(0, 7) == "SENDMSG")
     {
-        // LOG
-        // TODO
+        Log(string("// COMMAND // Attempting to send a message"));
+        if(variables.size() == 2)
+        {
+            return SendSENDMSG(0,variables[0],group_name,variables[1]);
+        }
+        else
+        {
+            LogError("// COMMAND// SENDMSG has inncorrect ammount of variables");
+            return -1;
+        }
 
     }
     else if (message.substr(0, 11) == "LISTSERVERS")
     {
         Log(string("// COMMAND // Attempting to list of servers to client"));
-        RespondLISTSERVERS();
+        //We can just reuse our servers function for this
+        return SendSERVERS(clientSock); 
     }
     else // Unknown
     {
