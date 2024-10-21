@@ -63,11 +63,8 @@ int main(int argc, char* argv[])
 
     cout << "Server connected, please type the password:" << endl;
     string message_intake;
-
-    if (send(server_sock, message_intake.c_str(), message_intake.length(), 0) < 0)
-    {
-        cout << "Error on sending command, please try again." << endl;
-    }
+    int bytes = recv(server_sock, buffer, 1024, 0);
+    buffer[bytes] = '\0';
 
     while (true)
     {

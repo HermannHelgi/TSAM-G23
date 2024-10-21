@@ -73,11 +73,7 @@ int main(int argc, char* argv[])
             break;
         }
 
-        cout << message_intake.size() << endl;
         string new_string = '\x01' + message_intake + '\x04';
-        cout << new_string << endl;
-        cout << new_string.size() << endl;
-
 
         if (send(server_sock, new_string.c_str(), new_string.length(), 0) < 0)
         {

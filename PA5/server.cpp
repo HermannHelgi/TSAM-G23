@@ -55,7 +55,7 @@ int Server::CheckMessages()
                     struct pollfd new_pollfd = {new_socket, POLLIN, 0};
                     file_descriptors.push_back(new_pollfd);
                     Log(string("// CONNECT // New connection made: " + to_string(new_pollfd.fd)));
-                    helo_received[new_pollfd.fd] = false;
+                    helo_received[new_pollfd.fd] = -1;
                     SendHELO(new_pollfd.fd);
                 }
                 else
@@ -69,28 +69,31 @@ int Server::CheckMessages()
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
-                            close(file_descriptors[i].fd);
-                            file_descriptors.erase(file_descriptors.begin() + i);
-                            i--;
-                            clientSock = INT32_MAX;
 
                             helo_received.erase(helo_received.find(file_descriptors[i].fd));
                             list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
                             connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
                             group_name_to_fd.erase(group_name_to_fd.find(fd_to_group_name[file_descriptors[i].fd]));
                             fd_to_group_name.erase(fd_to_group_name.find(file_descriptors[i].fd));
+                            
+                            close(file_descriptors[i].fd);
+                            file_descriptors.erase(file_descriptors.begin() + i);
+                            i--;
+                            clientSock = INT32_MAX;
                         }
                         else
                         {
                             Log(string("// DISCONNECT // Server Disconnected: " + to_string(file_descriptors[i].fd)));
-                            close(file_descriptors[i].fd);
-                            file_descriptors.erase(file_descriptors.begin() + i);
-                            i--;
+                            
                             helo_received.erase(helo_received.find(file_descriptors[i].fd));
                             list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
                             connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
                             group_name_to_fd.erase(group_name_to_fd.find(fd_to_group_name[file_descriptors[i].fd]));
                             fd_to_group_name.erase(fd_to_group_name.find(file_descriptors[i].fd));
+                            
+                            close(file_descriptors[i].fd);
+                            file_descriptors.erase(file_descriptors.begin() + i);
+                            i--;
                         }
                     }
                     else
@@ -98,7 +101,11 @@ int Server::CheckMessages()
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // New command from Client: " + to_string(file_descriptors[i].fd)));
-                            ReceiveClientCommand();
+                            int val = ReceiveClientCommand();
+                            if (val == -1)
+                            {
+                                send(clientSock, errorMessage.data(), errorMessage.size(), 0);
+                            }
                         }
                         else
                         {
@@ -401,11 +408,11 @@ int Server::RespondHELO(int fd, vector<string> variables)
         }
         else
         {
-            helo_received[fd] = true;
+            helo_received[fd] = 1;
             fd_to_group_name[fd] = variables[0];
             group_name_to_fd[variables[0]] = fd;
-            string ip_address;
-            list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)}; // TODO: HAS TO BE FIXED!!!!
+            string ip_address = inet_ntoa(sin.sin_addr);
+            list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
             Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
         }
 
@@ -450,9 +457,10 @@ int Server::SendSERVERS(int fd)
 {
     char send_buffer[5121];
     size_t pos = 0;
+    string group_info = "SERVERS";
     for (const auto& group_server : Server::list_of_connections) 
     {
-        string group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
+        group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
         strcat(send_buffer,group_info.c_str());
     }
     if(send(fd,send_buffer,sizeof(send_buffer),0) < 0)
@@ -468,7 +476,7 @@ int Server::SendSERVERS(int fd)
 }
 
 // Process command from client on the server
-void Server::ReceiveClientCommand()
+int Server::ReceiveClientCommand()
 {
     string message = buffer;
 
@@ -494,7 +502,9 @@ void Server::ReceiveClientCommand()
         // LOG
         LogError(string("// CLIENT // Unknown command from client."));
         LogError(message);
+        return -1;
     }
+    return 1;
 }
 
 int Server::RespondLISTSERVERS()

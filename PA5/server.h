@@ -61,7 +61,7 @@ public:
     int CheckClientPassword(string password, int &clientSock, int socketNum);
 
     // May wanna change this to simply be each individual command/message
-    void ReceiveClientCommand();
+    int ReceiveClientCommand();
     int ReceiveServerCommand(int message_length, int fd);
     
     int RespondHELO(int fd, vector<string> variables);
@@ -102,7 +102,7 @@ public:
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
     map<string, vector<string>> our_message_buffer; // Stores messages for ourselves.
-    map<int, bool> helo_received;
+    map<int, int> helo_received;
     map<int, string> fd_to_group_name; 
     map<string, int> group_name_to_fd; 
 
