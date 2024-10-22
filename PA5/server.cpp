@@ -17,7 +17,10 @@ void Server::CheckKeepalive()
         Log(string("// MESSAGE // Sending status packets."));
         for (int i = 0; i < file_descriptors.size(); i++)
         {
-            SendSTATUSREQ(file_descriptors[i].fd);
+            if (file_descriptors[i].fd != listenSock && file_descriptors[i].fd != clientSock)
+            {
+                SendSTATUSREQ(file_descriptors[i].fd);
+            }
         }
         last_keepalive = time(NULL);
     }
@@ -667,38 +670,30 @@ int Server::RespondSERVERS(vector<string> variables)
     }
     else
     {
-        for (int i = 0; i < variables.size(); i++)
+        for (int i = 0; i < variables.size(); i += 3)
         {
-            if (i + 2 <= variables.size())
+            string new_group_name = variables[i];
+            string new_group_ip = variables[i+1];
+            string new_group_port = variables[i+2];
+
+            struct sockaddr_in new_addr_test;
+
+            if (isdigit(new_group_port.c_str()[0]))
             {
-                string new_group_name = variables[i];
-                string new_group_ip = variables[i+1];
-                string new_group_port = variables[i+2];
-
-                struct sockaddr_in new_addr_test;
-
-                if (isdigit(new_group_port.c_str()[0]))
+                if (inet_pton(AF_INET, new_group_ip.data(), &new_addr_test.sin_addr) > 0)
                 {
-                    if (inet_pton(AF_INET, new_group_ip.data(), &new_addr_test.sin_addr) > 0)
-                    {
-                        documented_servers[new_group_name] = {new_group_ip, stoi(new_group_port)};
-                    }
-                    else
-                    {
-                        LogError(string("// COMMAND // IP address not valid, continuing."));
-                        continue;
-                    }
+                    documented_servers[new_group_name] = {new_group_ip, stoi(new_group_port)};
                 }
                 else
                 {
-                    LogError(string("// COMMAND // Portnum not a number, continuing."));
+                    LogError(string("// COMMAND // IP address not valid: " + new_group_ip  + " continuing."));
                     continue;
                 }
             }
             else
             {
-                Log(string("// COMMAND // No new servers to document OR lacking variables."));
-                break;
+                LogError(string("// COMMAND // Portnum not a number: " + new_group_port + " continuing."));
+                continue;
             }
         }
     }
