@@ -55,6 +55,8 @@ public:
     int InitializeServer();
     void CheckForMoreConnections();
     bool ConnectToServer(string ip, int port);
+    void CheckTimeouts();
+    void CheckKeepalive();
 
     void ClearBuffer();
     int CheckMessages();
@@ -83,9 +85,14 @@ public:
     int SendKEEPALIVE();
     int SendGETMSGS(int fd);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
-    int SendSTATUSREQ();
+    int SendSTATUSREQ(int fd);
 
     int connected_servers = 0;
+    int max_server_capacity = 8;
+    int min_server_capacity = 3;
+    double expiration_of_servers = 300;
+    double keepalive_frequency = 120;
+    time_t last_keepalive;
     int listenSock;                 // Socket for connections to server
     int portnum;
     int timeout = 50;               // Timeout for Poll()
