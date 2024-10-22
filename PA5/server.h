@@ -16,6 +16,7 @@
 #include <vector>
 #include <list>
 #include <poll.h>
+#include <queue>
 
 #include <iostream>
 #include <sstream>
@@ -69,6 +70,8 @@ public:
     int RespondGETMSGS(int fd, vector<string> variables);
     int RespondLISTSERVERS();
 
+    int RespondGetMSG(string group_id); // For the Client only. It reads from our_message_buffer;
+
     int SendHELO(int fd);
     int SendSERVERS(int fd);
     int SendKEEPALIVE();
@@ -99,7 +102,7 @@ public:
     vector<string> connection_names;
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
-    map<string, vector<string>> our_message_buffer; // Stores messages for ourselves.
+    map<string, queue<string>> our_message_buffer; // Stores messages for ourselves.
     map<int, int> helo_received;
     map<int, string> fd_to_group_name; 
     map<string, int> group_name_to_fd; 

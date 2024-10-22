@@ -401,7 +401,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
     //Begin by storing the message.
     if(to_group_name == group_name) // The msg is addressed to us
     {
-        our_message_buffer[from_group_name].push_back(data); //Store in private buffer
+        our_message_buffer[from_group_name].push(data); //Store in private buffer
         Log(string("// COMMAND // Message is addressed to us. Storing message."));
         return 1;
     }
@@ -422,12 +422,15 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             else
             {
                 Log(string("// COMMAND // Succeeded sending message to group: " + to_group_name));
-                return -1;
+                return 1;
             }
         }
         else
         {
-            //TODO can't find the server
+            LogError(string("// COMMAND // Not connected to group: " + to_group_name));
+            Log(string("// COMMAND // Storring message"));
+            other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
+            return -1;
         }
     }
 
@@ -559,6 +562,75 @@ int Server::SendSERVERS(int fd)
     }
 }
 
+int Server::RespondGetMSG(string group_id)
+{
+
+    char send_buffer[5121];
+    memset(send_buffer,0,sizeof(send_buffer));
+
+    //Check if the group has ever sent anything
+    if(our_message_buffer.find(group_id) != our_message_buffer.end()) 
+    {
+        //There is a stored messages
+        if(our_message_buffer[group_id].size() > 0)
+        {
+            strcat(send_buffer,our_message_buffer[group_id].front().c_str());
+            our_message_buffer[group_id].pop();
+            Log(string("// CLIENT // Group: " + group_id + " Has a messages for client. Responding to client"));
+            //Attempting to send
+            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send message to client from group: " + group_id));
+                return -1;
+            }
+            else
+            {
+                Log(string("// CLIENT // Group: " + group_id + " has a message for client. Replied to Client Suceeded."));
+                return 1;
+            }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+        }
+        else
+        {
+            //No messages stored from group
+            Log(string("// CLIENT // Group: " + group_id + " Has no messages for client. Responding to client"));
+            strcat(send_buffer,("Currently no messages from group: " + group_id +".").c_str()); //Perhaps might fail?
+            //Respond with there being no messages
+            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send no message from group: " + group_id));
+                return -1;
+            }
+            else
+            {
+                Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
+                return 1;
+            }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+        }
+
+    }
+    else
+    {
+        //Group has never connected
+        Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Responding to client"));
+        strcat(send_buffer,("Group: " + group_id +" has never sent a message.").c_str()); //Perhaps might fail? 
+        //Responding to client that group has never tried sending
+        if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+        {
+            LogError(string("// CLIENT // Failed to send never messaged from group: " + group_id)); 
+            return -1;
+        }
+        else
+        {
+            Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
+            return 1;
+        }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+    }
+    LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+}
+
 // Process command from client on the server
 int Server::ReceiveClientCommand(int message_length)
 {
@@ -568,8 +640,33 @@ int Server::ReceiveClientCommand(int message_length)
 
     if (message.substr(0, 6) == "GETMSG")
     {
+
         // LOG
-        // TODO
+        if(variables.size() == 1)
+        {
+            Log(string("// COMMAND // GETMSG is correctly formated. Checking for messages"));
+            return RespondGetMSG(variables[0]);
+        }
+        else
+        {
+            LogError(string("// COMMAND // GETMSG is incorrectly formated."));
+            //Respond to client with error.
+            char send_buffer[5121];
+            memset(send_buffer,0,sizeof(send_buffer));
+            string error_msg = "GETMSG is incorrectly formated";
+            strcat(send_buffer,error_msg.c_str());
+            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send error msg: "+ error_msg));
+            }
+            else
+            {
+                Log(string("// CLIENT // Error msg succeeded sending: "+error_msg));
+            }
+            return -1;
+        }
+
+        //Check if enough variables revived. i.e GETMSG,Group_id
 
     }
     else if (message.substr(0, 7) == "SENDMSG")
@@ -581,7 +678,21 @@ int Server::ReceiveClientCommand(int message_length)
         }
         else
         {
-            LogError("// COMMAND// SENDMSG has inncorrect ammount of variables");
+            LogError("// COMMAND // SENDMSG has inncorrect ammount of variables");    
+
+            //Respond to client with error.
+            char send_buffer[5121];
+            memset(send_buffer,0,sizeof(send_buffer));
+            string error_msg = "SENDMSG has inncorrect ammount of variables";
+            strcat(send_buffer,error_msg.c_str());
+            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send error msg: "+ error_msg));
+            }
+            else
+            {
+                Log(string("// CLIENT // Error msg succeeded sending: "+error_msg));
+            }
             return -1;
         }
 
