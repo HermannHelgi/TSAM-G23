@@ -682,6 +682,7 @@ int Server::RespondSERVERS(vector<string> variables)
             {
                 if (inet_pton(AF_INET, new_group_ip.data(), &new_addr_test.sin_addr) > 0)
                 {
+                    Log(string("// COMMAND // New server: " + new_group_name + " IP: " + new_group_ip + " Port: " + new_group_port + " documented."));
                     documented_servers[new_group_name] = {new_group_ip, stoi(new_group_port)};
                 }
                 else
