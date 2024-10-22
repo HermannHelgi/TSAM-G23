@@ -52,7 +52,7 @@ public:
     Server(int portnumber, string password);
     ~Server();
 
-    int InitializeServer();
+    void InitializeServer();
     void CheckForMoreConnections();
     bool ConnectToServer(string ip, int port);
     void CheckTimeouts();

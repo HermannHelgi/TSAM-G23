@@ -29,7 +29,9 @@ int Server::SendSTATUSREQ(int fd)
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send STATUSREQ."));
+        return -1;
     }
+    return 1;
 }
 
 void Server::CheckTimeouts()
@@ -54,7 +56,9 @@ void Server::CheckTimeouts()
                 it = socket_timers.erase(it);
 
                 close(socket);
-                file_descriptors.erase(find(file_descriptors.begin(), file_descriptors.end(), socket));
+                file_descriptors.erase(std::find_if(file_descriptors.begin(), file_descriptors.end(), [&](const pollfd& pfd) {
+                    return pfd.fd == socket;  // Compare the fd field of pollfd with socket
+                }));
                 connected_servers--;
             }
             else
@@ -63,7 +67,9 @@ void Server::CheckTimeouts()
                 helo_received.erase(socket);
                 it = socket_timers.erase(it);
                 close(socket);
-                file_descriptors.erase(find(file_descriptors.begin(), file_descriptors.end(), socket));
+                file_descriptors.erase(std::find_if(file_descriptors.begin(), file_descriptors.end(), [&](const pollfd& pfd) {
+                    return pfd.fd == socket;  // Compare the fd field of pollfd with socket
+                }));
                 connected_servers--;
             }
         }
@@ -142,7 +148,7 @@ bool Server::ConnectToServer(string ip, int port)
     return true;
 }
 
-int Server::InitializeServer()
+void Server::InitializeServer()
 {
     listenSock = open_socket(portnum); 
     Log(string("// SYSTEM // Starting listen on port " + to_string(portnum)));
@@ -724,6 +730,7 @@ int Server::RespondGETMSGS(int fd, vector<string> variables)
         LogError(string("// COMMAND // Too few variables in GETMSG command. Aborting."));
         return -1;
     }
+    return 1;
 }
 
 int Server::RespondHELO(int fd, vector<string> variables)
@@ -786,7 +793,9 @@ int Server::SendGETMSGS(int fd)
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send GETMSGS"));
+        return -1;
     }
+    return 1;
 }
 
 //Sends a list servers to the given file_descriptor

@@ -14,11 +14,7 @@ int main(int argc, char* argv[])
     freopen("Log.txt", "a", stdout);
 
     Server main_server(port, password);
-    int check = main_server.InitializeServer();
-    if (check == -1)
-    {
-        return 1;
-    }
+    main_server.InitializeServer();
 
     bool finished = false;
     while(!finished)
@@ -27,7 +23,7 @@ int main(int argc, char* argv[])
         main_server.CheckForMoreConnections();
         main_server.CheckTimeouts();
         main_server.CheckKeepalive();
-        check = main_server.CheckMessages();
+        int check = main_server.CheckMessages();
         if (check < 0)
         {
             finished = true;
