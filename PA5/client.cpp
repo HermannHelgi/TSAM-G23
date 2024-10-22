@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
 
     while (true)
     {
+        memset(buffer, 0, sizeof(buffer));
         getline(cin, message_intake); // Get the users command
 
         if (message_intake == "Exit" || message_intake == "exit" || message_intake == "EXIT")
@@ -80,7 +81,7 @@ int main(int argc, char* argv[])
             cout << "Error on sending command, please try again." << endl;
         }
 
-        int bytes = recv(server_sock, buffer, 1024, 0);
+        int bytes = recv(server_sock, buffer, 1024, MSG_WAITFORONE);
         buffer[bytes] = '\0';
 
         if (bytes <= 0)

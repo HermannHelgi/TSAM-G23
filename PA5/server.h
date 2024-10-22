@@ -105,6 +105,7 @@ public:
     map<string, int> group_name_to_fd; 
 
     string group_name = "A5_23";
+    string client_name = "CLIENT";
     string client_password;                // Responses and basic strings.
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";

@@ -278,17 +278,19 @@ void Server::StripServerMessage(int message_length, string &command, vector<stri
 
     size_t old_comma_index = 0;
     size_t comma_index = main.find(',');
-    if (comma_index != string::npos)
+    size_t semicomma_index = main.find(';');
+    if (comma_index != string::npos || semicomma_index != string::npos)
     {
-        command = main.substr(0, comma_index);
-        while (comma_index != string::npos)
+        command = main.substr(0, min(comma_index, semicomma_index));
+        while (comma_index != string::npos || semicomma_index != string::npos)
         {
-            old_comma_index = comma_index;
+            old_comma_index = min(comma_index, semicomma_index);
             comma_index = main.find(',', (old_comma_index+1));
+            semicomma_index = main.find(',', (old_comma_index+1));
             
-            if (comma_index != std::string::npos) 
+            if (comma_index != std::string::npos || semicomma_index != string::npos) 
             {
-                variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+                variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
             } 
             else 
             {
@@ -308,7 +310,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
     if (password == passwordCheck)
     {
         clientSock = socketNum;
-        connection_names.emplace_back("CLIENT");
+        connection_names.emplace_back(client_name);
         struct sockaddr_in sin;
         socklen_t len = sizeof(sin);
         if (getpeername(clientSock, (struct sockaddr*)&sin, &len) < 0)
@@ -319,10 +321,10 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
         else
         {
             helo_received[clientSock] = 1;
-            fd_to_group_name[clientSock] = "CLIENT";
-            group_name_to_fd["CLIENT"] = clientSock;
+            fd_to_group_name[clientSock] = client_name;
+            group_name_to_fd[client_name] = clientSock;
             string ip_address = inet_ntoa(sin.sin_addr);
-            list_of_connections["CLIENT"] = {ip_address, ntohs(sin.sin_port)};
+            list_of_connections[client_name] = {ip_address, ntohs(sin.sin_port)};
             Log(string("// COMMAND // CLIENT has been tied to: " + ip_address));
         }
         return 1;
@@ -531,6 +533,7 @@ int Server::SendGETMSG(int fd, string var)
 int Server::SendSERVERS(int fd)
 {
     char send_buffer[5121];
+    memset(send_buffer, 0, sizeof(send_buffer));
     size_t pos = 0;
     string group_info;
     send_buffer[0] = 'S';
@@ -544,6 +547,10 @@ int Server::SendSERVERS(int fd)
 
     for (const auto& group_server : Server::list_of_connections) 
     {
+        if (group_server.first == client_name)
+        {
+            continue;
+        }
         group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
         strcat(send_buffer,group_info.c_str());
     }
