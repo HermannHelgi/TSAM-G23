@@ -8,6 +8,73 @@ Server::Server(int portnumber, string password)
 
 Server::~Server() {}
 
+void Server::CheckForMoreConnections()
+{
+    if (connected_servers < 3 && documented_servers.size() != connected_servers)
+    {
+        map<string, pair<string, int>>::iterator it = documented_servers.begin();
+
+        while (it != documented_servers.end())
+        {
+            if (list_of_connections.count(it->first))
+            {
+                // ALREADY CONNECTED
+                it++;
+                continue;
+            }
+            else
+            {
+                // CAN CONNECT
+                string server_ip = it->second.first;
+                int server_port = it->second.second;
+
+                Log(string("// CONNECT // Attempting new connection with documented server."));
+                if (ConnectToServer(server_ip, server_port))
+                {
+                    Log(string("// CONNECT // New connection established."));
+                    it++;
+
+                    if (connected_servers >= 3)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    LogError(string("// CONNECT // Failed to set up connection with documented server: " + it->first));
+                    it = documented_servers.erase(it);
+                }
+            }
+        }
+    }
+    return;
+}
+
+bool Server::ConnectToServer(string ip, int port)
+{
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(port);
+    if (inet_pton(AF_INET, ip.c_str(), &server_address.sin_addr) <= 0)
+    {
+        LogError(string("// CONNECT // Invalid IP address."));
+        return false;
+    }
+
+    if ((new_socket = connect(listenSock, (struct sockaddr*)&server_address, sizeof(server_address))) < 0)
+    {
+        LogError(string("// CONNECT // Connection to " + ip + ":" + to_string(port) + " failed."));
+        return false;
+    }
+
+    connected_servers++;
+    struct pollfd new_pollfd = {new_socket, POLLIN, 0};
+    file_descriptors.push_back(new_pollfd);
+    helo_received[new_pollfd.fd] = -1;
+    SendHELO(new_pollfd.fd);
+    return true;
+}
+
 int Server::InitializeServer()
 {
     listenSock = open_socket(portnum); 
@@ -46,17 +113,29 @@ int Server::CheckMessages()
                 if (file_descriptors[i].fd == listenSock)
                 {
                     Log(string("// CONNECT // New connection trying to be made."));
-                    if ((new_socket = accept(listenSock, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
-                        LogError(string("// CONNECT // Failed to make new connection."));
-                        continue;
-                    }
+                    if (connected_servers <= 8) 
+                    {
+                        if ((new_socket = accept(listenSock, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+                            LogError(string("// CONNECT // Failed to make new connection."));
+                            continue;
+                        }
 
-                    // New connection made
-                    struct pollfd new_pollfd = {new_socket, POLLIN, 0};
-                    file_descriptors.push_back(new_pollfd);
-                    Log(string("// CONNECT // New connection made: " + to_string(new_pollfd.fd)));
-                    helo_received[new_pollfd.fd] = -1;
-                    SendHELO(new_pollfd.fd);
+                        // New connection made
+                        connected_servers++;
+                        struct pollfd new_pollfd = {new_socket, POLLIN, 0};
+                        file_descriptors.push_back(new_pollfd);
+                        Log(string("// CONNECT // New connection made: " + to_string(new_pollfd.fd)));
+                        helo_received[new_pollfd.fd] = -1;
+                        SendHELO(new_pollfd.fd);
+                    }
+                    else
+                    {
+                        Log(string("// CONNECT // Reached connection limit, rejecting connection."));
+                        
+                        if ((new_socket = accept(listenSock, (struct sockaddr *)&address, (socklen_t *)&addrlen)) >= 0) {
+                            close(new_socket);
+                        }
+                    }
                 }
                 else
                 {
@@ -65,7 +144,6 @@ int Server::CheckMessages()
 
                     if (valread <= 0) 
                     {
-                        // TODO: NEED TO REMOVE NAMES FROM MAP AND VECTOR
                         if (file_descriptors[i].fd == clientSock)
                         {
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
@@ -86,7 +164,7 @@ int Server::CheckMessages()
                             Log(string("// DISCONNECT // Server Disconnected: " + to_string(file_descriptors[i].fd)));
                             
                             // In case someone disconnects without saying HELO
-                            if (helo_received[file_descriptors[i].fd])
+                            if (helo_received[file_descriptors[i].fd] == 1)
                             {
                                 helo_received.erase(file_descriptors[i].fd);
                                 list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
@@ -97,6 +175,7 @@ int Server::CheckMessages()
                                 close(file_descriptors[i].fd);
                                 file_descriptors.erase(file_descriptors.begin() + i);
                                 i--;
+                                connected_servers--;
                             }
                             else
                             {
@@ -104,6 +183,7 @@ int Server::CheckMessages()
                                 close(file_descriptors[i].fd);
                                 file_descriptors.erase(file_descriptors.begin() + i);
                                 i--;
+                                connected_servers--;
                             }
                         }
                     }
@@ -138,6 +218,7 @@ int Server::CheckMessages()
                                 // This is client
                                 else
                                 {
+                                    connected_servers--;
                                     Log(string("// CLIENT // New client recognized: " + to_string(file_descriptors[i].fd)));
                                     send(file_descriptors[i].fd, acceptMessage.data(), acceptMessage.size(), 0);
                                     continue; 
@@ -345,15 +426,20 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     vector<string> variables;
     StripServerMessage(message_length, command, variables);
     
-    if (command == "HELO")
+    if (command == "HELO" && !helo_received[fd])
     {
         Log(string("// COMMAND // HELO detected. Taking in data."));
         return RespondHELO(fd, variables);
     }
+    else if (command == "HELO" && helo_received[fd])
+    {
+        Log(string("// COMMAND // HELO detected. Server already has said HELO. Sending SERVERS."));
+        return SendSERVERS(fd);
+    }
     else if (command == "SERVERS" && helo_received[fd])
     {
-        Log(string("// COMMAND // Should be an invalid command??."));
-        // Don't really know what we should do with this stuff? Maybe check if we're not ocnnected to enough servers then send out some connections?
+        Log(string("// COMMAND // SERVERS detected. Taking in data."));
+        return RespondSERVERS(variables);
     }
     else if (command == "KEEPALIVE" && helo_received[fd])
     {
@@ -367,7 +453,6 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     }
     else if (command == "SENDMSG" && helo_received[fd])
     {
-        // TODO
         Log(string("// COMMAND // SENDMSG detected. Sending data"));
         if(variables.size() == 3)
         {
@@ -384,18 +469,45 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     else if (command == "STATUSREQ" && helo_received[fd])
     {
         Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
-        return SendSTATUSRESP(fd);
+        return RespondSTATUSREQ(fd);
     }
     else if (command == "STATUSRESP" && helo_received[fd])
     {
-        // TODO
-        // LOG
+        Log(string("// COMMAND // STATUSRESP detected. Taking in data."));
+        return RespondSTATUSRESP(fd, variables);
     }
     else
     {
         // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
         LogError(command);
         return -1;
+    }
+}
+
+int Server::RespondSTATUSRESP(int fd, vector<string> variables)
+{
+    return 1;
+}
+
+int Server::RespondSTATUSREQ(int fd)
+{
+    string full_msg = "STATUSRESP";
+    map<string, vector<pair<string, string>>>::iterator it;
+
+    for (it = other_groups_message_buffer.begin(); it != other_groups_message_buffer.end(); it++)
+    {
+        full_msg += "," + it->first + "," + to_string(it->second.size());
+    }
+
+    if(send(fd, full_msg.data(), full_msg.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send STATUSRESP to server: " + to_string(fd)));
+        return -1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Successfully sent STATUSRESP to server: " + to_string(fd)));
+        return 1;
     }
 }
 
@@ -438,11 +550,54 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             return -1;
         }
     }
-
-
 }
 
+int Server::RespondSERVERS(vector<string> variables)
+{
+    if (variables.size() == 0)
+    {
+        Log(string("// COMMAND // No new servers to document."));
+        return 1;
+    }
+    else
+    {
+        for (int i = 0; i < variables.size(); i++)
+        {
+            if (i + 2 <= variables.size())
+            {
+                string new_group_name = variables[i];
+                string new_group_ip = variables[i+1];
+                string new_group_port = variables[i+2];
 
+                struct sockaddr_in new_addr_test;
+
+                if (isdigit(new_group_port.c_str()[0]))
+                {
+                    if (inet_pton(AF_INET, new_group_ip.data(), &new_addr_test.sin_addr) > 0)
+                    {
+                        documented_servers[new_group_name] = {new_group_ip, stoi(new_group_port)};
+                    }
+                    else
+                    {
+                        LogError(string("// COMMAND // IP address not valid, continuing."));
+                        continue;
+                    }
+                }
+                else
+                {
+                    LogError(string("// COMMAND // Portnum not a number, continuing."));
+                    continue;
+                }
+            }
+            else
+            {
+                Log(string("// COMMAND // No new servers to document OR lacking variables."));
+                break;
+            }
+        }
+    }
+    return 1;
+}
 
 int Server::RespondGETMSGS(int fd, vector<string> variables)
 {
@@ -471,12 +626,6 @@ int Server::RespondGETMSGS(int fd, vector<string> variables)
     }
 }
 
-int Server::SendSTATUSRESP(int fd)
-{
-    return 1;
-}
-
-
 int Server::RespondHELO(int fd, vector<string> variables)
 {
     if (variables.size() == 1)
@@ -496,6 +645,7 @@ int Server::RespondHELO(int fd, vector<string> variables)
             group_name_to_fd[variables[0]] = fd;
             string ip_address = inet_ntoa(sin.sin_addr);
             list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
+            documented_servers[variables[0]] = {ip_address, ntohs(sin.sin_port)};
             Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
         }
 
@@ -515,7 +665,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
         if (stoi(variables[0]) > 0)
         {
             Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " has messages. Collecting. ");
-            return SendGETMSG(fd, group_name);
+            return SendGETMSGS(fd, group_name);
         }
         else
         {
@@ -530,7 +680,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
     }
 }
 
-int Server::SendGETMSG(int fd, string var)
+int Server::SendGETMSGS(int fd, string var)
 {
     return 1;
 }
