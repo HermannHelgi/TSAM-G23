@@ -70,11 +70,11 @@ int Server::CheckMessages()
                         {
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
 
-                            helo_received.erase(helo_received.find(file_descriptors[i].fd));
+                            helo_received.erase(file_descriptors[i].fd);
                             list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
                             connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
-                            group_name_to_fd.erase(group_name_to_fd.find(fd_to_group_name[file_descriptors[i].fd]));
-                            fd_to_group_name.erase(fd_to_group_name.find(file_descriptors[i].fd));
+                            group_name_to_fd.erase(fd_to_group_name[file_descriptors[i].fd]);
+                            fd_to_group_name.erase(file_descriptors[i].fd);
                             
                             close(file_descriptors[i].fd);
                             file_descriptors.erase(file_descriptors.begin() + i);
@@ -85,15 +85,26 @@ int Server::CheckMessages()
                         {
                             Log(string("// DISCONNECT // Server Disconnected: " + to_string(file_descriptors[i].fd)));
                             
-                            helo_received.erase(helo_received.find(file_descriptors[i].fd));
-                            list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
-                            connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
-                            group_name_to_fd.erase(group_name_to_fd.find(fd_to_group_name[file_descriptors[i].fd]));
-                            fd_to_group_name.erase(fd_to_group_name.find(file_descriptors[i].fd));
-                            
-                            close(file_descriptors[i].fd);
-                            file_descriptors.erase(file_descriptors.begin() + i);
-                            i--;
+                            // In case someone disconnects without saying HELO
+                            if (helo_received[file_descriptors[i].fd])
+                            {
+                                helo_received.erase(file_descriptors[i].fd);
+                                list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
+                                connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
+                                group_name_to_fd.erase(fd_to_group_name[file_descriptors[i].fd]);
+                                fd_to_group_name.erase(file_descriptors[i].fd);
+                                
+                                close(file_descriptors[i].fd);
+                                file_descriptors.erase(file_descriptors.begin() + i);
+                                i--;
+                            }
+                            else
+                            {
+                                helo_received.erase(file_descriptors[i].fd);
+                                close(file_descriptors[i].fd);
+                                file_descriptors.erase(file_descriptors.begin() + i);
+                                i--;
+                            }
                         }
                     }
                     else
@@ -235,6 +246,7 @@ int Server::open_socket(int portno)
 
 void Server::StripServerMessage(int message_length, string &command, vector<string> &variables)
 {
+    // TODO: Strip server message will not work with stripping SERVERS command due to ;
     string main = buffer + '\0';
     string buffered_string = buffer + '\0';
     if (buffer[0] == '\x01')
@@ -296,6 +308,23 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
     if (password == passwordCheck)
     {
         clientSock = socketNum;
+        connection_names.emplace_back("CLIENT");
+        struct sockaddr_in sin;
+        socklen_t len = sizeof(sin);
+        if (getpeername(clientSock, (struct sockaddr*)&sin, &len) < 0)
+        {
+            LogError("// SYSTEM // GetPeerName Function failed.");
+            return -1;
+        }
+        else
+        {
+            helo_received[clientSock] = 1;
+            fd_to_group_name[clientSock] = "CLIENT";
+            group_name_to_fd["CLIENT"] = clientSock;
+            string ip_address = inet_ntoa(sin.sin_addr);
+            list_of_connections["CLIENT"] = {ip_address, ntohs(sin.sin_port)};
+            Log(string("// COMMAND // CLIENT has been tied to: " + ip_address));
+        }
         return 1;
     }
     return -1;
@@ -503,7 +532,16 @@ int Server::SendSERVERS(int fd)
 {
     char send_buffer[5121];
     size_t pos = 0;
-    string group_info = "SERVERS";
+    string group_info;
+    send_buffer[0] = 'S';
+    send_buffer[1] = 'E';
+    send_buffer[2] = 'R';
+    send_buffer[3] = 'V';
+    send_buffer[4] = 'E';
+    send_buffer[5] = 'R';
+    send_buffer[6] = 'S';
+    send_buffer[7] = ',';
+
     for (const auto& group_server : Server::list_of_connections) 
     {
         group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
