@@ -1,0 +1,2 @@
+[2024-10-22 16:11:35] // CONNECT // Connection to 127.0.0.1:41150 failed.
+[2024-10-22 16:11:35] // CONNECT // Failed to set up connection with documented server: A_5

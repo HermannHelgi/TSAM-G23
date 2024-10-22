@@ -17,6 +17,7 @@
 #include <list>
 #include <poll.h>
 #include <queue>
+#include <time.h>
 
 #include <iostream>
 #include <sstream>
@@ -106,7 +107,8 @@ public:
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, pair<string, int>> documented_servers; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
-    map<string, queue<string>> our_message_buffer; // Stores messages for ourselves.
+    map<string, queue<string>> our_message_buffer; // Stores messages for ourselves.°
+    map<int, time_t> socket_timers;
     map<int, int> helo_received;
     map<int, string> fd_to_group_name; 
     map<string, int> group_name_to_fd; 

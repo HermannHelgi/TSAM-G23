@@ -426,32 +426,32 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     vector<string> variables;
     StripServerMessage(message_length, command, variables);
     
-    if (command == "HELO" && !helo_received[fd])
+    if (command == "HELO" && helo_received[fd] == -1)
     {
         Log(string("// COMMAND // HELO detected. Taking in data."));
         return RespondHELO(fd, variables);
     }
-    else if (command == "HELO" && helo_received[fd])
+    else if (command == "HELO" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // HELO detected. Server already has said HELO. Sending SERVERS."));
         return SendSERVERS(fd);
     }
-    else if (command == "SERVERS" && helo_received[fd])
+    else if (command == "SERVERS" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // SERVERS detected. Taking in data."));
         return RespondSERVERS(variables);
     }
-    else if (command == "KEEPALIVE" && helo_received[fd])
+    else if (command == "KEEPALIVE" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // KEEPALIVE detected. Taking in data."));
         return RespondKEEPALIVE(fd, variables);
     }
-    else if (command == "GETMSGS" && helo_received[fd])
+    else if (command == "GETMSGS" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // GETMSGS detected. Sending data."));
         return RespondGETMSGS(fd, variables);
     }
-    else if (command == "SENDMSG" && helo_received[fd])
+    else if (command == "SENDMSG" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // SENDMSG detected. Sending data"));
         if(variables.size() == 3)
@@ -466,12 +466,12 @@ int Server::ReceiveServerCommand(int message_length, int fd)
             return -1;
         }
     }
-    else if (command == "STATUSREQ" && helo_received[fd])
+    else if (command == "STATUSREQ" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
         return RespondSTATUSREQ(fd);
     }
-    else if (command == "STATUSRESP" && helo_received[fd])
+    else if (command == "STATUSRESP" && helo_received[fd] == 1)
     {
         Log(string("// COMMAND // STATUSRESP detected. Taking in data."));
         return RespondSTATUSRESP(fd, variables);
@@ -486,6 +486,14 @@ int Server::ReceiveServerCommand(int message_length, int fd)
 
 int Server::RespondSTATUSRESP(int fd, vector<string> variables)
 {
+    for (int i = 0; i < variables.size(); i++)
+    {
+        if (variables[i] == group_name)
+        {
+            Log(string("// COMMAND // STATUSRESP has our messages. Calling GETMSGS."));
+            return SendGETMSGS(fd);
+        }
+    }
     return 1;
 }
 
