@@ -665,7 +665,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
         if (stoi(variables[0]) > 0)
         {
             Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " has messages. Collecting. ");
-            return SendGETMSGS(fd, group_name);
+            return SendGETMSGS(fd);
         }
         else
         {
@@ -680,7 +680,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
     }
 }
 
-int Server::SendGETMSGS(int fd, string var)
+int Server::SendGETMSGS(int fd)
 {
     return 1;
 }

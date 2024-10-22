@@ -80,7 +80,7 @@ public:
     int SendHELO(int fd);
     int SendSERVERS(int fd);
     int SendKEEPALIVE();
-    int SendGETMSGS(int fd, string group_name);
+    int SendGETMSGS(int fd);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ();
 
