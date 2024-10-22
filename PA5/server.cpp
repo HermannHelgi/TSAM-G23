@@ -126,29 +126,56 @@ void Server::CheckForMoreConnections()
     return;
 }
 
+#include <fcntl.h>
+#include <poll.h>
+#include <errno.h>
+
 bool Server::ConnectToServer(string ip, int port)
 {
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(port);
+
     if (inet_pton(AF_INET, ip.c_str(), &server_address.sin_addr) <= 0)
     {
         LogError(string("// CONNECT // Invalid IP address."));
         return false;
     }
 
-    if ((new_socket = connect(listenSock, (struct sockaddr*)&server_address, sizeof(server_address))) < 0)
+    int result = connect(listenSock, (struct sockaddr*)&server_address, sizeof(server_address));
+
+    if (result < 0 && errno != EINPROGRESS)
     {
         LogError(string("// CONNECT // Connection to " + ip + ":" + to_string(port) + " failed."));
         return false;
     }
 
-    connected_servers++;
-    struct pollfd new_pollfd = {new_socket, POLLIN, 0};
-    file_descriptors.push_back(new_pollfd);
-    helo_received[new_pollfd.fd] = -1;
-    SendHELO(new_pollfd.fd);
-    return true;
+    if (result == 0) {
+        connected_servers++;
+        struct pollfd new_pollfd = {listenSock, POLLIN, 0};
+        file_descriptors.push_back(new_pollfd);
+        helo_received[new_pollfd.fd] = -1;
+        SendHELO(new_pollfd.fd);
+        return true;
+    }
+
+    struct pollfd poll_fd = {listenSock, POLLOUT, 0};
+    int poll_result = poll(&poll_fd, 1, timeout); 
+
+    if (poll_result > 0 && (poll_fd.revents & POLLOUT))
+    {
+        connected_servers++;
+        struct pollfd new_pollfd = {listenSock, POLLIN, 0};
+        file_descriptors.push_back(new_pollfd);
+        helo_received[new_pollfd.fd] = -1;
+        SendHELO(new_pollfd.fd);
+        return true;
+    }
+    else
+    {
+        LogError(string("// CONNECT // Connection to " + ip + ":" + to_string(port) + " timed out or failed."));
+        return false;
+    }
 }
 
 void Server::InitializeServer()
@@ -165,6 +192,17 @@ void Server::InitializeServer()
     last_keepalive = time(NULL);
     server_pollfd = {listenSock, POLLIN, 0};
     file_descriptors.emplace_back(server_pollfd);
+    
+    int flags = fcntl(listenSock, F_GETFL, 0);
+    if (flags < 0)
+    {
+        LogError("// SYSTEM // Failed to get socket flags.");
+    }
+
+    if (fcntl(listenSock, F_SETFL, flags | O_NONBLOCK) < 0)
+    {
+        LogError("// SYSTEM // Failed to set non-blocking mode.");
+    }
 }
 
 int Server::CheckMessages()
@@ -560,7 +598,6 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     else
     {
         // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
-        LogError(command);
         return -1;
     }
 }
