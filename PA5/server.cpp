@@ -352,8 +352,7 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     }
     else if (command == "SERVERS" && helo_received[fd])
     {
-        Log(string("// COMMAND // SERVERS detected. Taking in data."));
-        // TODO
+        Log(string("// COMMAND // Should be an invalid command??."));
         // Don't really know what we should do with this stuff? Maybe check if we're not ocnnected to enough servers then send out some connections?
     }
     else if (command == "KEEPALIVE" && helo_received[fd])
@@ -372,6 +371,8 @@ int Server::ReceiveServerCommand(int message_length, int fd)
         Log(string("// COMMAND // SENDMSG detected. Sending data"));
         if(variables.size() == 3)
         {
+            Log(string("// COMMAND // SENDMSG has correct amount of variables, attempting to send msg."));
+
             return SendSENDMSG(fd,variables[0],variables[1],variables[2]);
         }
         else
@@ -393,6 +394,7 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     else
     {
         // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
+        LogError(command);
         return -1;
     }
 }
@@ -400,6 +402,7 @@ int Server::ReceiveServerCommand(int message_length, int fd)
 int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
 {
     char send_buffer[5121];
+    memset(send_buffer,0,sizeof(send_buffer));
     //Begin by storing the message.
     if(to_group_name == group_name) // The msg is addressed to us
     {
@@ -413,8 +416,8 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
         if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
         {
             Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
-            strcat(buffer,data.c_str());
-            if(send(group_name_to_fd[to_group_name],buffer,sizeof(buffer),0) < 0)
+            strcat(send_buffer,("SENDMSG," + to_group_name + "," + from_group_name + "," + data).c_str());
+            if(send(group_name_to_fd[to_group_name],send_buffer,sizeof(buffer),0) < 0)
             {
                 LogError(string("// COMMAND // Failed sending massge to group: " + to_group_name));
                 Log(string("// COMMAND // Storring message"));
@@ -581,6 +584,7 @@ int Server::RespondGetMSG(string group_id)
         //There is a stored messages
         if(our_message_buffer[group_id].size() > 0)
         {
+            LogError(our_message_buffer[group_id].front());
             strcat(send_buffer,our_message_buffer[group_id].front().c_str());
             our_message_buffer[group_id].pop();
             Log(string("// CLIENT // Group: " + group_id + " Has a messages for client. Responding to client"));
@@ -676,7 +680,7 @@ int Server::ReceiveClientCommand(int message_length)
         //Check if enough variables revived. i.e GETMSG,Group_id
 
     }
-    else if (message.substr(0, 7) == "SENDMSG")
+    else if (message.substr(0, 8) == "SENDMSG")
     {
         Log(string("// COMMAND // Attempting to send a message"));
         if(variables.size() == 2)
