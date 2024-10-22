@@ -547,31 +547,37 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     
     if (command == "HELO" && helo_received[fd] == -1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // HELO detected. Taking in data."));
         return RespondHELO(fd, variables);
     }
     else if (command == "HELO" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // HELO detected. Server already has said HELO. Sending SERVERS."));
         return SendSERVERS(fd);
     }
     else if (command == "SERVERS" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // SERVERS detected. Taking in data."));
         return RespondSERVERS(variables);
     }
     else if (command == "KEEPALIVE" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // KEEPALIVE detected. Taking in data."));
         return RespondKEEPALIVE(fd, variables);
     }
     else if (command == "GETMSGS" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // GETMSGS detected. Sending data."));
         return RespondGETMSGS(fd, variables);
     }
     else if (command == "SENDMSG" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // SENDMSG detected. Sending data"));
         if(variables.size() == 3)
         {
@@ -587,11 +593,13 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     }
     else if (command == "STATUSREQ" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
         return RespondSTATUSREQ(fd);
     }
     else if (command == "STATUSRESP" && helo_received[fd] == 1)
     {
+        Log(string("// COMMAND // New command: " + string(buffer)));
         Log(string("// COMMAND // STATUSRESP detected. Taking in data."));
         return RespondSTATUSRESP(fd, variables);
     }
