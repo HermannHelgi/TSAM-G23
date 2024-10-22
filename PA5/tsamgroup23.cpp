@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
     while(!finished)
     {
         // TODO: Add KEEPALIVE timer which at a rate of once per 5~ minutes sends to all connected servers that we have messages.
+        main_server.CheckForMoreConnections();
         check = main_server.CheckMessages();
         if (check < 0)
         {

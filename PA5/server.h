@@ -52,6 +52,8 @@ public:
     ~Server();
 
     int InitializeServer();
+    void CheckForMoreConnections();
+    bool ConnectToServer(string ip, int port);
 
     void ClearBuffer();
     int CheckMessages();
@@ -69,19 +71,20 @@ public:
     int RespondKEEPALIVE(int fd, vector<string> variables);
     int RespondGETMSGS(int fd, vector<string> variables);
     int RespondLISTSERVERS();
+    int RespondSERVERS(vector<string> variables);
+    int RespondSTATUSREQ(int fd);
+    int RespondSTATUSRESP(int fd, vector<string> variables);
 
     int RespondGetMSG(string group_id); // For the Client only. It reads from our_message_buffer;
 
     int SendHELO(int fd);
     int SendSERVERS(int fd);
     int SendKEEPALIVE();
-    int SendGETMSG(int fd, string group_name);
+    int SendGETMSGS(int fd, string group_name);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ();
-    int SendSTATUSRESP(int fd);
 
-    
-
+    int connected_servers = 0;
     int listenSock;                 // Socket for connections to server
     int portnum;
     int timeout = 50;               // Timeout for Poll()
@@ -101,6 +104,7 @@ public:
     vector<pollfd> file_descriptors;
     vector<string> connection_names;
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
+    map<string, pair<string, int>> documented_servers; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
     map<string, queue<string>> our_message_buffer; // Stores messages for ourselves.
     map<int, int> helo_received;
@@ -114,5 +118,5 @@ public:
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";
 
 private:
-    int BACKLOG = 5;
+    int BACKLOG = 8;
 };
