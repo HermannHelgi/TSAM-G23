@@ -827,7 +827,7 @@ int Server::RespondGETMSGS(int fd, vector<string> variables)
 {
     if (variables.size() >= 1)
     {
-        Log(string("// COMMAND // Group variables detected, attempting to send messages."));
+        Log(string("// COMMAND // Group variables detected, attempting to send messages. Count: " + to_string(variables.size())));
         for (int i = 0; i < variables.size(); i++)
         {
             if (other_groups_message_buffer.find(variables[i]) != other_groups_message_buffer.end())
