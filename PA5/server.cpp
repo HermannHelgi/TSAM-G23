@@ -313,9 +313,8 @@ int Server::CheckMessages()
                             int val = ReceiveServerCommand(valread, file_descriptors[i].fd);
                             socket_timers[file_descriptors[i].fd] = time(NULL);
 
-                            if (val == -1 && clientSock == INT32_MAX) // Might be client trying to connect.
+                            if (val == 2 && clientSock == INT32_MAX) // Might be client trying to connect.
                             {
-                                Log(string("// UNKNOWN // Failed to process command from Server, checking for client password: " + to_string(file_descriptors[i].fd)));
                                 val = CheckClientPassword(client_password, clientSock, file_descriptors[i].fd);
 
                                 // Just an Unknown message
@@ -598,6 +597,13 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     vector<vector<string>> full_variables_vector(max_variables);
     StripServerMessage(message_length, commands, full_variables_vector);
     
+    if (commands[0] == client_password)
+    {
+        Log("// CLIENT // Detected CLIENT password.");
+        return 2;
+    }
+
+    Log("// COMMAND // " + string(buffer));
     for (int i = 0; i < commands.size(); i++)
     {
         int error_code = 5;
@@ -785,7 +791,7 @@ int Server::RespondSERVERS(vector<string> variables)
     }
     else if (variables.size() > 2)
     {
-        for (int i = 0; i < variables.size(); i += 3)
+        for (int i = 0; (i+2) < variables.size(); i += 3)
         {
             string new_group_name = variables[i];
             string new_group_ip = variables[i+1];
