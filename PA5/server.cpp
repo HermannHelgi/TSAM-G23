@@ -309,7 +309,7 @@ int Server::CheckMessages()
                         }
                         else
                         {
-                            Log(string("// COMMAND // New command from Server: " + to_string(file_descriptors[i].fd)));
+                            Log(string("// COMMAND // New command from Server: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd)));
                             int val = ReceiveServerCommand(valread, file_descriptors[i].fd);
                             socket_timers[file_descriptors[i].fd] = time(NULL);
 
@@ -746,7 +746,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             }
             else
             {
-                Log(string("// COMMAND // Succeeded sending message to group: " + fd));
+                Log(string("// COMMAND // Succeeded sending message to group: " + fd_to_group_name[fd] + " : " + to_string(fd)));
                 return 1;
             }
         }
