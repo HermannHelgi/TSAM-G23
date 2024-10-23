@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <cstdio>
-#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -11,24 +10,17 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <time.h>
+#include <poll.h>
+#include <errno.h>
 #include <algorithm>
 #include <map>
 #include <vector>
 #include <list>
-#include <poll.h>
 #include <queue>
-#include <time.h>
-
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <map>
-
-#include <fcntl.h>
-#include <poll.h>
-#include <errno.h>
-
-#include <unistd.h>
 
 #ifndef SOCK_NONBLOCK
 #include <fcntl.h>
@@ -86,6 +78,8 @@ public:
 
     int RespondCONNECTSERVER(vector<string> variables);
     int RespondGetMSG(string group_id); // For the Client only. It reads from our_message_buffer;
+    int RespondMESSAGEBUFFER();
+    int RespondDOCSERVERS();
 
     int SendHELO(int fd);
     int SendSERVERS(int fd);
@@ -96,7 +90,7 @@ public:
 
     int connected_servers = 0;
     int max_server_capacity = 8;
-    int min_server_capacity = 3;
+    int min_server_capacity = 4;
     int max_variables = 10000;
 
     double expiration_of_servers = 300;

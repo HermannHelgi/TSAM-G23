@@ -1,0 +1,23 @@
+[2024-10-23 19:06:14] // SYSTEM // Starting listen on port 4000
+[2024-10-23 19:06:31] // CONNECT // New connection trying to be made.
+[2024-10-23 19:06:31] // CONNECT // New connection made: 4
+[2024-10-23 19:06:31] // SENDING // HELO,A5_23
+[2024-10-23 19:06:32] // MESSAGE // New message received from: 4
+[2024-10-23 19:06:32] // COMMAND // New command from Server:  : 4
+[2024-10-23 19:06:32] // CLIENT // Detected CLIENT password.
+[2024-10-23 19:06:32] // COMMAND // CLIENT has been tied to: 127.0.0.1
+[2024-10-23 19:06:32] // CLIENT // New client recognized: 4
+[2024-10-23 19:06:32] // SENDING // Welcome [CLIENT], how can I help you today?
+[2024-10-23 19:06:36] // MESSAGE // New message received from: 4
+[2024-10-23 19:06:36] // CLIENT // New command from Client: 4
+[2024-10-23 19:06:36] // CLIENT // Client is asking for entirety of documented servers.
+[2024-10-23 19:06:36] // SENDING // SERVERS,
+[2024-10-23 19:06:36] // COMMAND // Succeeded in sending list of documented servers.
+[2024-10-23 19:06:48] // MESSAGE // New message received from: 4
+[2024-10-23 19:06:48] // CLIENT // New command from Client: 4
+[2024-10-23 19:06:48] // CLIENT // Client asking for entirety of message buffer.
+[2024-10-23 19:06:48] // SENDING // STATUSRESP
+[2024-10-23 19:06:48] // COMMAND // Successfully sent STATUSRESP to server.
+[2024-10-23 19:07:15] // MESSAGE // Sending status packets.
+[2024-10-23 19:07:25] // MESSAGE // New message received from: 4
+[2024-10-23 19:07:25] // CLIENT // Client Disconnected: 4

@@ -63,7 +63,7 @@ void Server::CheckTimeouts()
     {
         if (difftime(now, it->second) > expiration_of_servers && fd_to_group_name[it->first] != client_name)
         {
-            Log(string("// DISCONNECT // Found a server who has been silent for too long: " + it->first));
+            Log(string("// DISCONNECT // Found a server who has been silent for too long: " + to_string(it->first)));
 
             if (helo_received[it->first] == 1)
             {
@@ -273,6 +273,7 @@ int Server::CheckMessages()
                             if (helo_received[file_descriptors[i].fd] == 1)
                             {
                                 helo_received.erase(file_descriptors[i].fd);
+                                documented_servers.erase(fd_to_group_name[file_descriptors[i].fd]); // Don't want to reconnect to the same dud over and over
                                 list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
                                 connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
                                 group_name_to_fd.erase(fd_to_group_name[file_descriptors[i].fd]);
@@ -716,6 +717,29 @@ int Server::RespondSTATUSREQ(int fd)
     }
 }
 
+int Server::RespondMESSAGEBUFFER()
+{
+    string full_msg = "MESSAGEBUFFER";
+    map<string, queue<string>>::iterator it;
+
+    for (it = our_message_buffer.begin(); it != our_message_buffer.end(); it++)
+    {
+        full_msg += ", " + it->first + ", " + to_string(it->second.size());
+    }
+
+    Log(string("// SENDING // " + full_msg));
+    if(send(clientSock, full_msg.data(), full_msg.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send STATUSRESP to client."));
+        return -1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Successfully sent STATUSRESP to server."));
+        return 1;
+    }
+}
+
 int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
 {
     string send_buffer;
@@ -1107,6 +1131,16 @@ int Server::ReceiveClientCommand(int message_length)
         Log(string("// CLIENT // Attempting to connect to server specified by client."));
         return RespondCONNECTSERVER(variables);
     }
+    else if (message == "MESSAGEBUFFER")
+    {
+        Log("// CLIENT // Client asking for entirety of message buffer.");
+        return RespondMESSAGEBUFFER();
+    }
+    else if (message == "DOCSERVERS")
+    {
+        Log("// CLIENT // Client is asking for entirety of documented servers.");
+        return RespondDOCSERVERS();
+    }
     else // Unknown
     {
         // LOG
@@ -1182,6 +1216,35 @@ int Server::RespondCONNECTSERVER(vector<string> variables)
     }
     else
     {
+        return 1;
+    }
+}
+
+int Server::RespondDOCSERVERS()
+{
+    string send_buffer = "SERVERS,";
+    size_t pos = 0;
+    string group_info;
+
+    for (const auto& group_server : documented_servers) 
+    {
+        if (group_server.first == client_name)
+        {
+            continue;
+        }
+        group_info = group_server.first +", "+ group_server.second.first +", "+ to_string(group_server.second.second)+";";
+        send_buffer += group_info;
+    }
+
+    Log(string("// SENDING // " + string(send_buffer)));
+    if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send list of documented servers."));
+        return -1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Succeeded in sending list of documented servers."));
         return 1;
     }
 }
