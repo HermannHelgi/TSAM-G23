@@ -28,9 +28,10 @@ void Server::CheckKeepalive()
 
 int Server::SendKEEPALIVE(int fd)
 {
-    string keepalive = "KEEPALIVE,";
+    string keepalive = "\x01KEEPALIVE,";
 
-    keepalive += other_groups_message_buffer[fd_to_group_name[fd]].size();
+    keepalive += to_string(other_groups_message_buffer[fd_to_group_name[fd]].size());
+    keepalive += '\x04';
 
     Log(string("// SENDING // " + keepalive));
     if (send(fd, keepalive.data(), keepalive.length(), 0) < 0)
@@ -43,7 +44,7 @@ int Server::SendKEEPALIVE(int fd)
 
 int Server::SendSTATUSREQ(int fd)
 {
-    string statusreq = "STATUSREQ";
+    string statusreq = "\x01STATUSREQ\x04";
     Log(string("// SENDING // " + statusreq));
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
@@ -557,7 +558,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
 
 int Server::SendHELO(int fd)
 {
-    string helo = "HELO," + group_name;
+    string helo = "\x01HELO," + group_name + '\x04';
     Log(string("// SENDING // " + helo));
     send(fd, helo.data(), helo.size(), 0);
     return 1;
@@ -649,7 +650,7 @@ int Server::RespondSTATUSRESP(int fd, vector<string> variables)
 
 int Server::RespondSTATUSREQ(int fd)
 {
-    string full_msg = "STATUSRESP";
+    string full_msg = "\x01STATUSRESP";
     map<string, vector<pair<string, string>>>::iterator it;
 
     for (it = other_groups_message_buffer.begin(); it != other_groups_message_buffer.end(); it++)
@@ -657,6 +658,7 @@ int Server::RespondSTATUSREQ(int fd)
         full_msg += "," + it->first + "," + to_string(it->second.size());
     }
 
+    full_msg += '\x04';
     Log(string("// SENDING // " + full_msg));
     if(send(fd, full_msg.data(), full_msg.length(), 0) < 0)
     {
@@ -685,7 +687,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
         if (fd != 0)
         {
             Log(string("// COMMAND // Demanded by group: " + to_string(fd) + " to send messages of: " + to_group_name));
-            send_buffer = ("SENDMSG," + to_group_name + "," + from_group_name + "," + data);
+            send_buffer = ("\x01SENDMSG," + to_group_name + "," + from_group_name + "," + data + '\x04');
             Log(string("// SENDING // " + string(send_buffer)));
             if(send(fd, send_buffer.data(), send_buffer.length(), 0) < 0)
             {
@@ -706,7 +708,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
             {
                 Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
-                send_buffer = ("SENDMSG," + to_group_name + "," + from_group_name + "," + data);
+                send_buffer = ("\x01SENDMSG," + to_group_name + "," + from_group_name + "," + data + '\x04');
                 Log(string("// SENDING // " + string(send_buffer)));
                 if(send(group_name_to_fd[to_group_name], send_buffer.data(), send_buffer.length(), 0) < 0)
                 {
@@ -856,7 +858,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
 
 int Server::SendGETMSGS(int fd)
 {
-    string statusreq = "GETMSGS," + group_name;
+    string statusreq = "\x01GETMSGS," + group_name + "\x04";
     Log(string("// SENDING // " + statusreq));
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
@@ -869,7 +871,7 @@ int Server::SendGETMSGS(int fd)
 //Sends a list servers to the given file_descriptor
 int Server::SendSERVERS(int fd)
 {
-    string send_buffer = "SERVERS,";
+    string send_buffer = "\x01SERVERS,";
     size_t pos = 0;
     string group_info;
 
@@ -882,6 +884,8 @@ int Server::SendSERVERS(int fd)
         group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
         send_buffer += group_info;
     }
+
+    send_buffer += '\x04';
     Log(string("// SENDING // " + string(send_buffer)));
     if(send(fd, send_buffer.data(), send_buffer.length(), 0) < 0)
     {
