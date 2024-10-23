@@ -19,11 +19,26 @@ void Server::CheckKeepalive()
         {
             if (file_descriptors[i].fd != listenSock && file_descriptors[i].fd != clientSock)
             {
-                SendSTATUSREQ(file_descriptors[i].fd);
+                SendKEEPALIVE(file_descriptors[i].fd);
             }
         }
         last_keepalive = time(NULL);
     }
+}
+
+int Server::SendKEEPALIVE(int fd)
+{
+    string keepalive = "KEEPALIVE,";
+
+    keepalive += other_groups_message_buffer[fd_to_group_name[fd]].size();
+
+    Log(string("// SENDING // " + keepalive));
+    if (send(fd, keepalive.data(), keepalive.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send KEEPALIVE."));
+        return -1;
+    }
+    return 1;
 }
 
 int Server::SendSTATUSREQ(int fd)

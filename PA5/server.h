@@ -89,7 +89,7 @@ public:
 
     int SendHELO(int fd);
     int SendSERVERS(int fd);
-    int SendKEEPALIVE();
+    int SendKEEPALIVE(int fd);
     int SendGETMSGS(int fd);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ(int fd);
@@ -98,7 +98,7 @@ public:
     int max_server_capacity = 8;
     int min_server_capacity = 3;
     double expiration_of_servers = 300;
-    double keepalive_frequency = 120;
+    double keepalive_frequency = 60;
     time_t last_keepalive;
     int listenSock;                 // Socket for connections to server
     int portnum;
