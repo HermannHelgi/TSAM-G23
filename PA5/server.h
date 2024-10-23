@@ -43,6 +43,7 @@ using namespace std;
 //DISCONNECT: If a disconnect occurs
 //COMMAND; Relating to commands (fails or succesful executions)
 //UNKNOWN: essentaily misc, if something unknown or unexpected happens
+//SENDING: Whenever a message is sent, it should have the sending tag.
 
 
 
@@ -64,6 +65,7 @@ public:
     void LogError(string message);
     int open_socket(int portno);
     void StripServerMessage(int message_length, string &command, vector<string> &variables);
+    void StripClientMessage(int message_length, string &command, vector<string> &variables);
     int CheckClientPassword(string password, int &clientSock, int socketNum);
 
     // May wanna change this to simply be each individual command/message
@@ -107,7 +109,7 @@ public:
 
     struct pollfd server_pollfd;
     
-    char buffer[5121];              // buffer for reading from clients
+    char buffer[5120];              // buffer for reading from clients
     int buffer_size = 5120;
     vector<pollfd> file_descriptors;
     vector<string> connection_names;

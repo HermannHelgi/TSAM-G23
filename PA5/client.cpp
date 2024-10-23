@@ -24,7 +24,8 @@ int main(int argc, char* argv[])
 {
     int server_sock;                           // Socket variable which is going to be used to send to server
     struct sockaddr_in server_addr;     // The socket address variable used to set the preset of the server
-    char buffer[1025];
+    int buffer_size = 5120;
+    char buffer[buffer_size + 1];
 
     // Checking if right amount of arguments is given.
     if (argc != 3) 
@@ -61,11 +62,13 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    cout << "Server connected, please type the password:" << endl;
     string message_intake;
-    int bytes = recv(server_sock, buffer, 1024, 0);
+    cout << "Taking in HELO." << endl;
+    int bytes = recv(server_sock, buffer, buffer_size, 0);
     buffer[bytes] = '\0';
+    cout << "Bytes: " << bytes << " : " << buffer << endl;
 
+    cout << "Server connected, please type the password:" << endl;
     while (true)
     {
         memset(buffer, 0, sizeof(buffer));
@@ -76,12 +79,15 @@ int main(int argc, char* argv[])
             break;
         }
 
+        cout << "Sending message: " << message_intake << endl;
         if (send(server_sock, message_intake.c_str(), message_intake.length(), 0) < 0)
         {
             cout << "Error on sending command, please try again." << endl;
         }
 
-        int bytes = recv(server_sock, buffer, 1024, MSG_WAITFORONE);
+        cout << "Waiting for response. " << endl;
+        int bytes = recv(server_sock, buffer, buffer_size, MSG_WAITFORONE);
+        cout << "Message received, size: " << bytes << " - Message: " << buffer << endl;
         buffer[bytes] = '\0';
 
         if (bytes <= 0)

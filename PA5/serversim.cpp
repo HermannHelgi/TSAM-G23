@@ -24,7 +24,8 @@ int main(int argc, char* argv[])
 {
     int server_sock;                           // Socket variable which is going to be used to send to server
     struct sockaddr_in server_addr;     // The socket address variable used to set the preset of the server
-    char buffer[1025];
+    int buffer_size = 1024;
+    char buffer[buffer_size + 1];
 
     // Checking if right amount of arguments is given.
     if (argc != 3) 
@@ -74,13 +75,14 @@ int main(int argc, char* argv[])
         }
 
         string new_string = '\x01' + message_intake + '\x04';
-
+        cout << "Sending: " << new_string << endl;
         if (send(server_sock, new_string.c_str(), new_string.length(), 0) < 0)
         {
             cout << "Error on sending command, please try again." << endl;
         }
 
-        int bytes = recv(server_sock, buffer, 1024, 0);
+        int bytes = recv(server_sock, buffer, buffer_size, 0);
+        cout << "Bytes received: " << bytes;
         buffer[bytes] = '\0';
 
         if (bytes <= 0)

@@ -29,6 +29,7 @@ void Server::CheckKeepalive()
 int Server::SendSTATUSREQ(int fd)
 {
     string statusreq = "STATUSREQ";
+    Log(string("// SENDING // " + statusreq));
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send STATUSREQ."));
@@ -313,6 +314,7 @@ int Server::CheckMessages()
                             int val = ReceiveClientCommand(valread);
                             if (val == -1)
                             {
+                                Log(string("// SENDING // " + errorMessage));
                                 send(clientSock, errorMessage.data(), errorMessage.size(), 0);
                             }
                         }
@@ -332,6 +334,7 @@ int Server::CheckMessages()
                                 {
                                     LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                     LogError(string(buffer));
+                                    Log(string("// SENDING // " + errorMessage));
                                     send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
                                 }
                                 // This is client
@@ -339,6 +342,7 @@ int Server::CheckMessages()
                                 {
                                     connected_servers--;
                                     Log(string("// CLIENT // New client recognized: " + to_string(file_descriptors[i].fd)));
+                                    Log(string("// SENDING // " + acceptMessage));
                                     send(file_descriptors[i].fd, acceptMessage.data(), acceptMessage.size(), 0);
                                     continue; 
                                 }
@@ -347,6 +351,7 @@ int Server::CheckMessages()
                             {
                                 LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                 LogError(string(buffer));
+                                Log(string("// SENDING // " + errorMessage));
                                 send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
                             }
                         }
@@ -446,7 +451,6 @@ int Server::open_socket(int portno)
 
 void Server::StripServerMessage(int message_length, string &command, vector<string> &variables)
 {
-    // TODO: Strip server message will not work with stripping SERVERS command due to ;
     string main = buffer + '\0';
     string buffered_string = buffer + '\0';
     if (buffer[0] == '\x01')
@@ -476,6 +480,37 @@ void Server::StripServerMessage(int message_length, string &command, vector<stri
         }
     }
 
+    size_t old_comma_index = 0;
+    size_t comma_index = main.find(',');
+    size_t semicomma_index = main.find(';');
+    if (comma_index != string::npos || semicomma_index != string::npos)
+    {
+        command = main.substr(0, min(comma_index, semicomma_index));
+        while (comma_index != string::npos || semicomma_index != string::npos)
+        {
+            old_comma_index = min(comma_index, semicomma_index);
+            comma_index = main.find(',', (old_comma_index+1));
+            semicomma_index = main.find(',', (old_comma_index+1));
+            
+            if (comma_index != std::string::npos || semicomma_index != string::npos) 
+            {
+                variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
+            } 
+            else 
+            {
+                variables.emplace_back(main.substr(old_comma_index + 1));
+            }
+        }
+    }
+    else
+    {
+        command = main;
+    }
+}
+
+void Server::StripClientMessage(int message_length, string &command, vector<string> &variables)
+{
+    string main = buffer + '\0';
     size_t old_comma_index = 0;
     size_t comma_index = main.find(',');
     size_t semicomma_index = main.find(';');
@@ -535,6 +570,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
 int Server::SendHELO(int fd)
 {
     string helo = "HELO," + group_name;
+    Log(string("// SENDING // " + helo));
     send(fd, helo.data(), helo.size(), 0);
     return 1;
 }
@@ -633,6 +669,7 @@ int Server::RespondSTATUSREQ(int fd)
         full_msg += "," + it->first + "," + to_string(it->second.size());
     }
 
+    Log(string("// SENDING // " + full_msg));
     if(send(fd, full_msg.data(), full_msg.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send STATUSRESP to server: " + to_string(fd)));
@@ -647,8 +684,7 @@ int Server::RespondSTATUSREQ(int fd)
 
 int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, string data)
 {
-    char send_buffer[5121];
-    memset(send_buffer,0,sizeof(send_buffer));
+    string send_buffer;
     //Begin by storing the message.
     if(to_group_name == group_name) // The msg is addressed to us
     {
@@ -661,8 +697,9 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
         if (fd != 0)
         {
             Log(string("// COMMAND // Demanded by group: " + to_string(fd) + " to send messages of: " + to_group_name));
-            strcat(send_buffer,("SENDMSG," + to_group_name + "," + from_group_name + "," + data).c_str());
-            if(send(fd,send_buffer,sizeof(buffer),0) < 0)
+            send_buffer = ("SENDMSG," + to_group_name + "," + from_group_name + "," + data);
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(fd, send_buffer.data(), send_buffer.length(), 0) < 0)
             {
                 LogError(string("// COMMAND // Failed sending message to group: " + to_group_name));
                 Log(string("// COMMAND // Storing message"));
@@ -681,8 +718,9 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
             {
                 Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
-                strcat(send_buffer,("SENDMSG," + to_group_name + "," + from_group_name + "," + data).c_str());
-                if(send(group_name_to_fd[to_group_name],send_buffer,sizeof(buffer),0) < 0)
+                send_buffer = ("SENDMSG," + to_group_name + "," + from_group_name + "," + data);
+                Log(string("// SENDING // " + string(send_buffer)));
+                if(send(group_name_to_fd[to_group_name], send_buffer.data(), send_buffer.length(), 0) < 0)
                 {
                     LogError(string("// COMMAND // Failed sending message to group: " + to_group_name));
                     Log(string("// COMMAND // Storing message"));
@@ -831,6 +869,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
 int Server::SendGETMSGS(int fd)
 {
     string statusreq = "GETMSGS," + group_name;
+    Log(string("// SENDING // " + statusreq));
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send GETMSGS"));
@@ -842,18 +881,9 @@ int Server::SendGETMSGS(int fd)
 //Sends a list servers to the given file_descriptor
 int Server::SendSERVERS(int fd)
 {
-    char send_buffer[5121];
-    memset(send_buffer, 0, sizeof(send_buffer));
+    string send_buffer = "SERVERS,";
     size_t pos = 0;
     string group_info;
-    send_buffer[0] = 'S';
-    send_buffer[1] = 'E';
-    send_buffer[2] = 'R';
-    send_buffer[3] = 'V';
-    send_buffer[4] = 'E';
-    send_buffer[5] = 'R';
-    send_buffer[6] = 'S';
-    send_buffer[7] = ',';
 
     for (const auto& group_server : Server::list_of_connections) 
     {
@@ -862,9 +892,10 @@ int Server::SendSERVERS(int fd)
             continue;
         }
         group_info = group_server.first +","+ group_server.second.first +","+ to_string(group_server.second.second)+";";
-        strcat(send_buffer,group_info.c_str());
+        send_buffer += group_info;
     }
-    if(send(fd,send_buffer,sizeof(send_buffer),0) < 0)
+    Log(string("// SENDING // " + string(send_buffer)));
+    if(send(fd, send_buffer.data(), send_buffer.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send list of servers"));
         return -1;
@@ -878,9 +909,7 @@ int Server::SendSERVERS(int fd)
 
 int Server::RespondGetMSG(string group_id)
 {
-
-    char send_buffer[5121];
-    memset(send_buffer,0,sizeof(send_buffer));
+    string send_buffer;
 
     //Check if the group has ever sent anything
     if(our_message_buffer.find(group_id) != our_message_buffer.end()) 
@@ -889,11 +918,12 @@ int Server::RespondGetMSG(string group_id)
         if(our_message_buffer[group_id].size() > 0)
         {
             LogError(our_message_buffer[group_id].front());
-            strcat(send_buffer,our_message_buffer[group_id].front().c_str());
+            send_buffer += our_message_buffer[group_id].front();
             our_message_buffer[group_id].pop();
+
             Log(string("// CLIENT // Group: " + group_id + " Has a messages for client. Responding to client"));
-            //Attempting to send
-            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
             {
                 LogError(string("// CLIENT // Failed to send message to client from group: " + group_id));
                 return -1;
@@ -909,9 +939,10 @@ int Server::RespondGetMSG(string group_id)
         {
             //No messages stored from group
             Log(string("// CLIENT // Group: " + group_id + " Has no messages for client. Responding to client"));
-            strcat(send_buffer,("Currently no messages from group: " + group_id +".").c_str()); //Perhaps might fail?
+            send_buffer += ("Currently no messages from group: " + group_id +".");
             //Respond with there being no messages
-            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
             {
                 LogError(string("// CLIENT // Failed to send no message from group: " + group_id));
                 return -1;
@@ -929,9 +960,11 @@ int Server::RespondGetMSG(string group_id)
     {
         //Group has never connected
         Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Responding to client"));
-        strcat(send_buffer,("Group: " + group_id +" has never sent a message.").c_str()); //Perhaps might fail? 
+        send_buffer += ("Group: " + group_id +" has never sent a message.");
+
         //Responding to client that group has never tried sending
-        if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+        Log(string("// SENDING // " + string(send_buffer)));
+        if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
         {
             LogError(string("// CLIENT // Failed to send never messaged from group: " + group_id)); 
             return -1;
@@ -944,6 +977,7 @@ int Server::RespondGetMSG(string group_id)
             LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
     }
     LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+    return -1;
 }
 
 // Process command from client on the server
@@ -951,7 +985,7 @@ int Server::ReceiveClientCommand(int message_length)
 {
     vector<string> variables;
     string message;
-    StripServerMessage(message_length, message, variables);
+    StripClientMessage(message_length, message, variables);
 
     if (message.substr(0, 6) == "GETMSG")
     {
@@ -964,11 +998,11 @@ int Server::ReceiveClientCommand(int message_length)
         {
             LogError(string("// COMMAND // GETMSG is incorrectly formated."));
             //Respond to client with error.
-            char send_buffer[5121];
-            memset(send_buffer,0,sizeof(send_buffer));
             string error_msg = "GETMSG is incorrectly formated";
-            strcat(send_buffer,error_msg.c_str());
-            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            string send_buffer = error_msg;
+
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(),0) < 0)
             {
                 LogError(string("// CLIENT // Failed to send error msg: "+ error_msg));
             }
@@ -991,11 +1025,11 @@ int Server::ReceiveClientCommand(int message_length)
             LogError("// COMMAND // SENDMSG has inncorrect ammount of variables");    
 
             //Respond to client with error.
-            char send_buffer[5121];
-            memset(send_buffer,0,sizeof(send_buffer));
-            string error_msg = "SENDMSG has inncorrect ammount of variables";
-            strcat(send_buffer,error_msg.c_str());
-            if(send(clientSock,send_buffer,sizeof(send_buffer),0) < 0)
+            string error_msg = "SENDMSG has incorrect ammount of variables";
+            string send_buffer = error_msg;
+
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
             {
                 LogError(string("// CLIENT // Failed to send error msg: "+ error_msg));
             }
