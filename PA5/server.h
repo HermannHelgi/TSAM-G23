@@ -84,6 +84,7 @@ public:
     int RespondSTATUSREQ(int fd);
     int RespondSTATUSRESP(int fd, vector<string> variables);
 
+    int RespondCONNECTSERVER(vector<string> variables);
     int RespondGetMSG(string group_id); // For the Client only. It reads from our_message_buffer;
 
     int SendHELO(int fd);

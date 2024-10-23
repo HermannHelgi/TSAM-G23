@@ -1023,29 +1023,7 @@ int Server::ReceiveClientCommand(int message_length)
     else if (message.substr(0, 13) == "CONNECTSERVER")
     {
         Log(string("// CLIENT // Attempting to connect to server specified by client."));
-        if(variables.size() == 2)
-        {
-            if (isdigit(variables[1].c_str()[0]))
-            {
-                struct sockaddr_in new_addr_test;
-                if (inet_pton(AF_INET, variables[0].data(), &new_addr_test.sin_addr) > 0)
-                {
-                    return ConnectToServer(variables[0], stoi(variables[1]));
-                }
-                else
-                {
-                    LogError(string("// COMMAND // IP address not valid, continuing."));
-                }
-            }
-            else
-            {
-                LogError(string("// CLIENT // Port number given is not a number."));
-            }
-        }
-        else
-        {
-            LogError(string("// CLIENT // Too few variables given to connect."));
-        }
+        return RespondCONNECTSERVER(variables);
     }
     else // Unknown
     {
@@ -1055,6 +1033,75 @@ int Server::ReceiveClientCommand(int message_length)
         return -1;
     }
     return 1;
+}
+
+int Server::RespondCONNECTSERVER(vector<string> variables)
+{
+    if(variables.size() == 2)
+    {
+        if (isdigit(variables[1].c_str()[0]))
+        {
+            struct sockaddr_in new_addr_test;
+            if (inet_pton(AF_INET, variables[0].data(), &new_addr_test.sin_addr) > 0)
+            {
+                if (ConnectToServer(variables[0], stoi(variables[1])))
+                {
+                    Log("// CLIENT // Successfully connected to specified server.");
+                    string success_msg = "Successfully connected to specified server.";
+                    Log("// SENDING // " + success_msg);
+                    if (send(clientSock, success_msg.data(), success_msg.length(), 0) < 0)
+                    {
+                        LogError("// CLIENT // Failed to send success message.");
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+                else
+                {
+                    Log("// CLIENT // Failed to connect to specified server.");
+                    string fail_msg = "Failed to connect to specified server.";
+                    Log("// SENDING // " + fail_msg);
+                    if (send(clientSock, fail_msg.data(), fail_msg.length(), 0) < 0)
+                    {
+                        LogError("// CLIENT // Failed to send failure message.");
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+            }
+            else
+            {
+                LogError(string("// COMMAND // IP address not valid, leaving."));
+                return -1;
+            }
+        }
+        else
+        {
+            LogError(string("// CLIENT // Port number given is not a number."));
+        }
+    }
+    else
+    {
+        LogError(string("// CLIENT // Too few variables given to connect."));
+    }
+
+    string fail_msg = "Failed to use variables given, please try again.";
+    Log("// SENDING // " + fail_msg);
+    if (send(clientSock, fail_msg.data(), fail_msg.length(), 0) < 0)
+    {
+        LogError("// CLIENT // Failed to send failure message.");
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 int Server::RespondLISTSERVERS()
