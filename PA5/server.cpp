@@ -61,7 +61,7 @@ void Server::CheckTimeouts()
 
     while (it != socket_timers.end())
     {
-        if (difftime(now, it->second) > expiration_of_servers)
+        if (difftime(now, it->second) > expiration_of_servers && fd_to_group_name[it->first] != client_name)
         {
             Log(string("// DISCONNECT // Found a server who has been silent for too long: " + it->first));
 
@@ -121,7 +121,7 @@ void Server::CheckForMoreConnections()
                 string server_ip = it->second.first;
                 int server_port = it->second.second;
 
-                Log(string("// CONNECT // Attempting new connection with documented server."));
+                Log(string("// CONNECT // Attempting new connection with documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port)));
                 if (ConnectToServer(server_ip, server_port))
                 {
                     Log(string("// CONNECT // New connection established."));
@@ -134,7 +134,7 @@ void Server::CheckForMoreConnections()
                 }
                 else
                 {
-                    LogError(string("// CONNECT // Failed to set up connection with documented server: " + it->first));
+                    LogError(string("// CONNECT // Failed to set up connection with documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port)));
                     it = documented_servers.erase(it);
                 }
             }
