@@ -913,10 +913,9 @@ int Server::RespondHELO(int fd, vector<string> variables)
         connection_names.emplace_back(variables[0]);
         struct sockaddr_in sin;
         socklen_t len = sizeof(sin);
-        int getpeername_err;
-        if ((getpeername_err = getpeername(fd, (struct sockaddr*)&sin, &len)) < 0)
+        if (getpeername(fd, (struct sockaddr*)&sin, &len) < 0)
         {
-            LogError("// SYSTEM // GetPeerName Function failed: " + to_string(getpeername_err));
+            LogError("// SYSTEM // GetPeerName Function failed: " + string(strerror(errno)));
             return -1;
         }
         else
