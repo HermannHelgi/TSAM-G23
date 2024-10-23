@@ -163,21 +163,51 @@ bool Server::ConnectToServer(string ip, int port)
         return false;
     }
 
-    if (connect(outboundSocket, (struct sockaddr*)&new_server_address, sizeof(new_server_address)) < 0)
+    int flags = fcntl(outboundSocket, F_GETFL, 0);
+    if (flags < 0 || fcntl(outboundSocket, F_SETFL, flags | O_NONBLOCK) < 0)
     {
-        LogError("// CONNECT // Could not connect new IP.");
+        LogError("// CONNECT // Failed to set socket to non-blocking mode.");
         return false;
     }
-    else 
+
+    if (connect(outboundSocket, (struct sockaddr*)&new_server_address, sizeof(new_server_address)) < 0)
     {
-        Log(string("// CONNECT // New server connected on: ") + ip);
-        connected_servers++;
-        struct pollfd new_pollfd = {outboundSocket, POLLIN, 0};
-        file_descriptors.push_back(new_pollfd);
-        helo_received[new_pollfd.fd] = -1;
-        SendHELO(new_pollfd.fd);
-        return true;
+        if (errno != EINPROGRESS)
+        {
+            LogError("// CONNECT // Could not connect to new IP.");
+            return false;
+        }
+
+        struct pollfd pfd = {outboundSocket, POLLOUT, 0};
+        int result = poll(&pfd, 1, timeout);
+
+        if (result == 0)
+        {
+            LogError("// CONNECT // Connection timed out.");
+            return false;
+        }
+        else if (result < 0)
+        {
+            LogError("// CONNECT // Poll error.");
+            return false;
+        }
+
+        int err;
+        socklen_t len = sizeof(err);
+        if (getsockopt(outboundSocket, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0)
+        {
+            LogError("// CONNECT // Connection failed.");
+            return false;
+        }
     }
+
+    Log(string("// CONNECT // New server connected on: ") + ip);
+    connected_servers++;
+    struct pollfd new_pollfd = {outboundSocket, POLLIN, 0};
+    file_descriptors.push_back(new_pollfd);
+    helo_received[new_pollfd.fd] = -1;
+    SendHELO(new_pollfd.fd);
+    return true;
 }
 
 void Server::InitializeServer()

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <fcntl.h>
+
 
 #ifndef SOCK_NONBLOCK
 #include <fcntl.h>
@@ -98,7 +100,7 @@ public:
     time_t last_keepalive;
     int listenSock;                 // Socket for connections to server
     int portnum;
-    int timeout = 50;               // Timeout for Poll()
+    int timeout = 100;               // Timeout for Poll()
 
     int new_socket;                 // Temp variables for accepting new connections.
     struct sockaddr_in address;
