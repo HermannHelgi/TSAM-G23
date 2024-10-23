@@ -127,55 +127,39 @@ void Server::CheckForMoreConnections()
     return;
 }
 
-#include <fcntl.h>
-#include <poll.h>
-#include <errno.h>
-
 bool Server::ConnectToServer(string ip, int port)
 {
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(port);
+    struct sockaddr_in new_server_address;
+    new_server_address.sin_family = AF_INET;
+    new_server_address.sin_port = htons(port);
+    int outboundSocket;
 
-    if (inet_pton(AF_INET, ip.c_str(), &server_address.sin_addr) <= 0)
+    if ((outboundSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    {
+        LogError("// SYSTEM // Failed to open new socket.");
+        return false;
+    }
+
+    if (inet_pton(AF_INET, ip.c_str(), &new_server_address.sin_addr) <= 0)
     {
         LogError(string("// CONNECT // Invalid IP address."));
         return false;
     }
 
-    int result = connect(listenSock, (struct sockaddr*)&server_address, sizeof(server_address));
-
-    if (result < 0 && errno != EINPROGRESS)
+    if (connect(outboundSocket, (struct sockaddr*)&new_server_address, sizeof(new_server_address)) < 0)
     {
-        LogError(string("// CONNECT // Connection to " + ip + ":" + to_string(port) + " failed."));
+        LogError("// CONNECT // Could not connect new IP.");
         return false;
     }
-
-    if (result == 0) {
+    else 
+    {
+        Log(string("// CONNECT // New server connected on: ") + ip);
         connected_servers++;
-        struct pollfd new_pollfd = {listenSock, POLLIN, 0};
+        struct pollfd new_pollfd = {outboundSocket, POLLIN, 0};
         file_descriptors.push_back(new_pollfd);
         helo_received[new_pollfd.fd] = -1;
         SendHELO(new_pollfd.fd);
         return true;
-    }
-
-    struct pollfd poll_fd = {listenSock, POLLOUT, 0};
-    int poll_result = poll(&poll_fd, 1, timeout); 
-
-    if (poll_result > 0 && (poll_fd.revents & POLLOUT))
-    {
-        connected_servers++;
-        struct pollfd new_pollfd = {listenSock, POLLIN, 0};
-        file_descriptors.push_back(new_pollfd);
-        helo_received[new_pollfd.fd] = -1;
-        SendHELO(new_pollfd.fd);
-        return true;
-    }
-    else
-    {
-        LogError(string("// CONNECT // Connection to " + ip + ":" + to_string(port) + " timed out or failed."));
-        return false;
     }
 }
 
@@ -193,17 +177,6 @@ void Server::InitializeServer()
     last_keepalive = time(NULL);
     server_pollfd = {listenSock, POLLIN, 0};
     file_descriptors.emplace_back(server_pollfd);
-    
-    int flags = fcntl(listenSock, F_GETFL, 0);
-    if (flags < 0)
-    {
-        LogError("// SYSTEM // Failed to get socket flags.");
-    }
-
-    if (fcntl(listenSock, F_SETFL, flags | O_NONBLOCK) < 0)
-    {
-        LogError("// SYSTEM // Failed to set non-blocking mode.");
-    }
 }
 
 int Server::CheckMessages()

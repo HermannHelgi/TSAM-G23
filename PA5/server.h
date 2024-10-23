@@ -24,6 +24,10 @@
 #include <thread>
 #include <map>
 
+#include <fcntl.h>
+#include <poll.h>
+#include <errno.h>
+
 #include <unistd.h>
 
 #ifndef SOCK_NONBLOCK
