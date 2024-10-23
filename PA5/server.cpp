@@ -17,6 +17,7 @@ void Server::CheckKeepalive()
         Log(string("// MESSAGE // Sending status packets."));
         for (int i = 0; i < file_descriptors.size(); i++)
         {
+            Log("// MESSAGE // Sending KEEPALIVE to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
             if (file_descriptors[i].fd != listenSock && file_descriptors[i].fd != clientSock)
             {
                 SendKEEPALIVE(file_descriptors[i].fd);
@@ -63,7 +64,7 @@ void Server::CheckTimeouts()
     {
         if (difftime(now, it->second) > expiration_of_servers && fd_to_group_name[it->first] != client_name)
         {
-            Log(string("// DISCONNECT // Found a server who has been silent for too long: " + to_string(it->first)));
+            Log(string("// DISCONNECT // Found a server who has been silent for too long: " + fd_to_group_name[it->first] + " : " + to_string(it->first)));
 
             if (helo_received[it->first] == 1)
             {
@@ -124,7 +125,7 @@ void Server::CheckForMoreConnections()
                 Log(string("// CONNECT // Attempting new connection with documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port)));
                 if (ConnectToServer(server_ip, server_port))
                 {
-                    Log(string("// CONNECT // New connection established."));
+                    Log(string("// CONNECT // New connection established with: " + it->first));
                     it++;
 
                     if (connected_servers >= 3)
@@ -245,7 +246,7 @@ int Server::CheckMessages()
                 }
                 else
                 {
-                    Log(string("// MESSAGE // New message received from: " + to_string(file_descriptors[i].fd)));
+                    Log(string("// MESSAGE // New message received from: " + fd_to_group_name[file_descriptors[i].fd] +  " : " + to_string(file_descriptors[i].fd)));
                     int valread = recv(file_descriptors[i].fd, buffer, buffer_size, MSG_DONTWAIT);
 
                     if (valread <= 0) 
@@ -267,7 +268,7 @@ int Server::CheckMessages()
                         }
                         else
                         {
-                            Log(string("// DISCONNECT // Server Disconnected: " + to_string(file_descriptors[i].fd)));
+                            Log(string("// DISCONNECT // Server Disconnected: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd)));
                             
                             // In case someone disconnects without saying HELO
                             if (helo_received[file_descriptors[i].fd] == 1)
@@ -707,12 +708,12 @@ int Server::RespondSTATUSREQ(int fd)
     Log(string("// SENDING // " + full_msg));
     if(send(fd, full_msg.data(), full_msg.length(), 0) < 0)
     {
-        LogError(string("// COMMAND // Failed to send STATUSRESP to server: " + to_string(fd)));
+        LogError(string("// COMMAND // Failed to send STATUSRESP to server: " + fd_to_group_name[fd] + " : " + to_string(fd)));
         return -1;
     }
     else
     {
-        Log(string("// COMMAND // Successfully sent STATUSRESP to server: " + to_string(fd)));
+        Log(string("// COMMAND // Successfully sent STATUSRESP to server: " + fd_to_group_name[fd] + " : " + to_string(fd)));
         return 1;
     }
 }
