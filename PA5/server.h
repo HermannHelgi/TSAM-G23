@@ -68,7 +68,7 @@ public:
     void Log(string message);
     void LogError(string message);
     int open_socket(int portno);
-    void StripServerMessage(int message_length, string &command, vector<string> &variables);
+    void StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables);
     void StripClientMessage(int message_length, string &command, vector<string> &variables);
     int CheckClientPassword(string password, int &clientSock, int socketNum);
 
@@ -97,6 +97,8 @@ public:
     int connected_servers = 0;
     int max_server_capacity = 8;
     int min_server_capacity = 3;
+    int max_variables = 10000;
+
     double expiration_of_servers = 300;
     double keepalive_frequency = 60;
     time_t last_keepalive;

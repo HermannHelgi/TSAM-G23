@@ -438,62 +438,76 @@ int Server::open_socket(int portno)
    }
 }
 
-void Server::StripServerMessage(int message_length, string &command, vector<string> &variables)
+void Server::StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables)
 {
+    vector<string> messages;
     string main = buffer + '\0';
-    string buffered_string = buffer + '\0';
-    if (buffer[0] == '\x01')
+    int SOHlocation = main.find('\x01');
+    int EOTlocation = main.find('\x04');
+
+    while (SOHlocation != string::npos && EOTlocation != string::npos)
     {
-        main = buffered_string.substr(1);
-        size_t find_EOT = main.find('\x04');
-        if (find_EOT != string::npos)
-        {
-            main = main.substr(0, find_EOT);
-        }
-        else
-        {
-            LogError("// MESSAGE // Missing EOT Symbol.");
-        }
-    }
-    else
-    {
-        LogError("// MESSAGE // Missing SOH Symbol.");
-        size_t find_EOT = main.find('\x04');
-        if (find_EOT != string::npos)
-        {
-            main = buffered_string.substr(0, find_EOT);
-        }
-        else
-        {
-            LogError("// MESSAGE // Missing EOT Symbol.");
-        }
+        messages.emplace_back(main.substr(SOHlocation + 1, EOTlocation - (SOHlocation + 1)));
+
+        SOHlocation = main.find('\x01', SOHlocation + 1);
+        EOTlocation = main.find('\x04', EOTlocation + 1);
     }
 
-    size_t old_comma_index = 0;
-    size_t comma_index = main.find(',');
-    size_t semicomma_index = main.find(';');
-    if (comma_index != string::npos || semicomma_index != string::npos)
+    if (messages.size() == 0)
     {
-        command = main.substr(0, min(comma_index, semicomma_index));
-        while (comma_index != string::npos || semicomma_index != string::npos)
+        LogError("// MESSAGE // Could not find SOH or EOT.");
+        messages.emplace_back(main);
+    }
+
+    for (int i = 0; i < messages.size(); i++)
+    {
+        string command;
+        main = messages[i];
+        size_t old_comma_index = 0;
+        size_t comma_index = main.find(',');
+        size_t semicomma_index = main.find(';');
+        if (comma_index != string::npos)
         {
-            old_comma_index = min(comma_index, semicomma_index);
-            comma_index = main.find(',', (old_comma_index+1));
-            semicomma_index = main.find(',', (old_comma_index+1));
-            
-            if (comma_index != std::string::npos || semicomma_index != string::npos) 
+            command = main.substr(0, min(comma_index, semicomma_index));
+            commands.emplace_back(command);
+
+            if (command == "SENDMSG")
             {
-                variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
-            } 
-            else 
+                old_comma_index = comma_index;
+                comma_index = main.find(',', (old_comma_index+1));
+                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+                old_comma_index = comma_index;
+                comma_index = main.find(',', (old_comma_index+1));
+                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+                old_comma_index = comma_index;
+                variables[i].emplace_back(main.substr(old_comma_index + 1));
+            }
+            else
             {
-                variables.emplace_back(main.substr(old_comma_index + 1));
+                while (comma_index != string::npos || semicomma_index != string::npos)
+                {
+                    old_comma_index = min(comma_index, semicomma_index);
+                    comma_index = main.find(',', (old_comma_index+1));
+                    semicomma_index = main.find(';', (old_comma_index+1));
+                    
+                    if (comma_index != std::string::npos || semicomma_index != string::npos) 
+                    {
+                        variables[i].emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
+                    } 
+                    else 
+                    {
+                        variables[i].emplace_back(main.substr(old_comma_index + 1));
+                    }
+                }
             }
         }
-    }
-    else
-    {
-        command = main;
+        else
+        {
+            command = main;
+            commands.emplace_back(command);
+            vector<string> empty;
+            variables.emplace_back(empty);
+        }
     }
 }
 
@@ -506,19 +520,33 @@ void Server::StripClientMessage(int message_length, string &command, vector<stri
     if (comma_index != string::npos || semicomma_index != string::npos)
     {
         command = main.substr(0, min(comma_index, semicomma_index));
-        while (comma_index != string::npos || semicomma_index != string::npos)
+        if (command == "SENDMSG")
         {
-            old_comma_index = min(comma_index, semicomma_index);
+            old_comma_index = comma_index;
             comma_index = main.find(',', (old_comma_index+1));
-            semicomma_index = main.find(',', (old_comma_index+1));
-            
-            if (comma_index != std::string::npos || semicomma_index != string::npos) 
+            variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+            old_comma_index = comma_index;
+            comma_index = main.find(',', (old_comma_index+1));
+            variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+            old_comma_index = comma_index;
+            variables.emplace_back(main.substr(old_comma_index + 1));
+        }
+        else
+        {
+            while (comma_index != string::npos || semicomma_index != string::npos)
             {
-                variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
-            } 
-            else 
-            {
-                variables.emplace_back(main.substr(old_comma_index + 1));
+                old_comma_index = min(comma_index, semicomma_index);
+                comma_index = main.find(',', (old_comma_index+1));
+                semicomma_index = main.find(';', (old_comma_index+1));
+                
+                if (comma_index != std::string::npos || semicomma_index != string::npos) 
+                {
+                    variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
+                } 
+                else 
+                {
+                    variables.emplace_back(main.substr(old_comma_index + 1));
+                }
             }
         }
     }
@@ -566,73 +594,87 @@ int Server::SendHELO(int fd)
 
 int Server::ReceiveServerCommand(int message_length, int fd)
 {
-    string command;
-    vector<string> variables;
-    StripServerMessage(message_length, command, variables);
+    vector<string> commands;
+    vector<vector<string>> full_variables_vector(max_variables);
+    StripServerMessage(message_length, commands, full_variables_vector);
     
-    if (command == "HELO" && helo_received[fd] == -1)
+    for (int i = 0; i < commands.size(); i++)
     {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // HELO detected. Taking in data."));
-        return RespondHELO(fd, variables);
-    }
-    else if (command == "HELO" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // HELO detected. Server already has said HELO. Sending SERVERS."));
-        return SendSERVERS(fd);
-    }
-    else if (command == "SERVERS" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // SERVERS detected. Taking in data."));
-        return RespondSERVERS(variables);
-    }
-    else if (command == "KEEPALIVE" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // KEEPALIVE detected. Taking in data."));
-        return RespondKEEPALIVE(fd, variables);
-    }
-    else if (command == "GETMSGS" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // GETMSGS detected. Sending data."));
-        return RespondGETMSGS(fd, variables);
-    }
-    else if (command == "SENDMSG" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // SENDMSG detected. Sending data"));
-        if(variables.size() == 3)
-        {
-            Log(string("// COMMAND // SENDMSG has correct amount of variables, attempting to send msg."));
+        int error_code = 5;
+        string command = commands[i];
+        vector<string> variables = full_variables_vector[i];
 
-            return SendSENDMSG(0,variables[0],variables[1],variables[2]);
+        if (command == "HELO" && helo_received[fd] == -1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // HELO detected. Taking in data."));
+            error_code = RespondHELO(fd, variables);
+        }
+        else if (command == "HELO" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // HELO detected. Server already has said HELO. Sending SERVERS."));
+            error_code = SendSERVERS(fd);
+        }
+        else if (command == "SERVERS" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // SERVERS detected. Taking in data."));
+            error_code = RespondSERVERS(variables);
+        }
+        else if (command == "KEEPALIVE" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // KEEPALIVE detected. Taking in data."));
+            error_code = RespondKEEPALIVE(fd, variables);
+        }
+        else if (command == "GETMSGS" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // GETMSGS detected. Sending data."));
+            error_code = RespondGETMSGS(fd, variables);
+        }
+        else if (command == "SENDMSG" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // SENDMSG detected. Sending data"));
+            if(variables.size() == 3)
+            {
+                Log(string("// COMMAND // SENDMSG has correct amount of variables, attempting to send msg."));
+
+                error_code = SendSENDMSG(0,variables[0],variables[1],variables[2]);
+            }
+            else
+            {
+                LogError("// COMMAND // SENDMSG has inncorrect ammount of variables");
+                return -1;
+            }
+        }
+        else if (command == "STATUSREQ" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
+            error_code = RespondSTATUSREQ(fd);
+        }
+        else if (command == "STATUSRESP" && helo_received[fd] == 1)
+        {
+            Log(string("// COMMAND // New command: " + string(command)));
+            Log(string("// COMMAND // STATUSRESP detected. Taking in data."));
+            error_code = RespondSTATUSRESP(fd, variables);
         }
         else
         {
-            LogError("// COMMAND// SENDMSG has inncorrect ammount of variables");
+            // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
+            return -1;
+        }
+
+        if (error_code == -1)
+        {
             return -1;
         }
     }
-    else if (command == "STATUSREQ" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // STATUSREQ detected. Sending STATUSRESP."));
-        return RespondSTATUSREQ(fd);
-    }
-    else if (command == "STATUSRESP" && helo_received[fd] == 1)
-    {
-        Log(string("// COMMAND // New command: " + string(buffer)));
-        Log(string("// COMMAND // STATUSRESP detected. Taking in data."));
-        return RespondSTATUSRESP(fd, variables);
-    }
-    else
-    {
-        // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
-        return -1;
-    }
+    Log("// COMMAND // Finished commands list.");
+    return 1;
 }
 
 int Server::RespondSTATUSRESP(int fd, vector<string> variables)
@@ -728,7 +770,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
                 LogError(string("// COMMAND // Not connected to group: " + to_group_name));
                 Log(string("// COMMAND // Storing message"));
                 other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
-                return -1;
+                return 1;
             }
         }
     }
@@ -741,7 +783,7 @@ int Server::RespondSERVERS(vector<string> variables)
         Log(string("// COMMAND // No new servers to document."));
         return 1;
     }
-    else
+    else if (variables.size() > 2)
     {
         for (int i = 0; i < variables.size(); i += 3)
         {
@@ -771,6 +813,11 @@ int Server::RespondSERVERS(vector<string> variables)
             }
         }
     }
+    else
+    {
+        LogError("// COMMAND // Too few variables in SERVERS command, aborting.");
+        return 1;
+    }
     return 1;
 }
 
@@ -778,7 +825,7 @@ int Server::RespondGETMSGS(int fd, vector<string> variables)
 {
     if (variables.size() >= 1)
     {
-        Log(string("// COMMAND // Too few variables in GETMSG command. Aborting."));
+        Log(string("// COMMAND // Group variables detected, attempting to send messages."));
         for (int i = 0; i < variables.size(); i++)
         {
             if (other_groups_message_buffer.find(variables[i]) != other_groups_message_buffer.end())

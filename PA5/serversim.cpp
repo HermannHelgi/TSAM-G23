@@ -68,13 +68,24 @@ int main(int argc, char* argv[])
     while (true)
     {
         getline(cin, message_intake); // Get the users command
+        string new_string;
+        if (message_intake == "DOUBLE")
+        {
+            getline(cin, message_intake);
+            new_string += message_intake + '\x04' + '\x01';
+            getline(cin, message_intake);
+            new_string += message_intake + '\x04' + '\x01';
+            getline(cin, message_intake);
+            new_string += message_intake;
+            message_intake = new_string;
+        }
 
         if (message_intake == "Exit" || message_intake == "exit" || message_intake == "EXIT")
         {
             break;
         }
 
-        string new_string = '\x01' + message_intake + '\x04';
+        new_string = '\x01' + message_intake + '\x04';
         cout << "Sending: " << new_string << endl;
         if (send(server_sock, new_string.c_str(), new_string.length(), 0) < 0)
         {
