@@ -525,9 +525,6 @@ void Server::StripClientMessage(int message_length, string &command, vector<stri
             comma_index = main.find(',', (old_comma_index+1));
             variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
             old_comma_index = comma_index;
-            comma_index = main.find(',', (old_comma_index+1));
-            variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
-            old_comma_index = comma_index;
             variables.emplace_back(main.substr(old_comma_index + 1));
         }
         else
@@ -646,8 +643,7 @@ int Server::ReceiveServerCommand(int message_length, int fd)
             Log(string("// COMMAND // SENDMSG detected. Sending data"));
             if(variables.size() == 3)
             {
-                Log(string("// COMMAND // SENDMSG has correct amount of variables, attempting to send msg."));
-
+                Log(string("// COMMAND // SENDMSG has correct amount of variables, attempting to send message."));
                 error_code = SendSENDMSG(0,variables[0],variables[1],variables[2]);
             }
             else
@@ -755,7 +751,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
             //check if to_group_name is connected
             if(find(connection_names.begin(),connection_names.end(),to_group_name) != connection_names.end())
             {
-                Log(string("// COMMAND // Conected to group: " + to_group_name + " attempting to send message"));
+                Log(string("// COMMAND // Connected to group: " + to_group_name + " attempting to send message"));
                 send_buffer = ("\x01SENDMSG," + to_group_name + "," + from_group_name + "," + data + '\x04');
                 Log(string("// SENDING // " + string(send_buffer)));
                 if(send(group_name_to_fd[to_group_name], send_buffer.data(), send_buffer.length(), 0) < 0)
@@ -1063,7 +1059,21 @@ int Server::ReceiveClientCommand(int message_length)
         Log(string("// COMMAND // Attempting to send a message"));
         if(variables.size() == 2)
         {
-            return SendSENDMSG(0,variables[0],group_name,variables[1]);
+            int error_code = SendSENDMSG(0,variables[0],group_name,variables[1]);
+            if (error_code == 1)
+            {
+                string success_msg = "Message is in the botnet.";
+
+                Log(string("// SENDING // " + string(success_msg)));
+                if(send(clientSock, success_msg.data(), success_msg.length(), 0) < 0)
+                {
+                    LogError(string("// CLIENT // Failed to send status message: "+ success_msg));
+                }
+            }
+            else
+            {
+                return error_code;
+            }
         }
         else
         {
