@@ -97,6 +97,7 @@ public:
     int max_server_capacity = 8;                    // How many bots the server should be connected to.
     int min_server_capacity = 4;                    // The minimum amount of bots the server should keep in contact with. 
     int max_variables = 10000;                      // Ceiling on amount of variables another bot can send.
+    int keepalive_packets = 0;
 
     double keepalive_frequency = 60;                // How often the server sends a KEEPALIVE message.
     time_t last_keepalive;                          // Last time the server sent a keepalive.
@@ -140,7 +141,6 @@ public:
     string client_password = "ASSDESTROYER"; 
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";
-
 private:
     int BACKLOG = 8;
 };

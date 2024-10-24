@@ -18,11 +18,27 @@ void Server::CheckKeepalive()
         {
             if (file_descriptors[i].fd != listenSock && file_descriptors[i].fd != clientSock)
             {
-                Log("// MESSAGE // Sending KEEPALIVE to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
-                SendKEEPALIVE(file_descriptors[i].fd);
+                if (keepalive_packets == 3)
+                {
+                    Log("// MESSAGE // Sending STATUSREQ to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
+                    SendSTATUSREQ(file_descriptors[i].fd);
+                }
+                else
+                {
+                    Log("// MESSAGE // Sending KEEPALIVE to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
+                    SendKEEPALIVE(file_descriptors[i].fd);
+                }
             }
         }
         last_keepalive = time(NULL);
+        if (keepalive_packets == 3)
+        {
+            keepalive_packets = 0;
+        }
+        else
+        {
+            keepalive_packets++;
+        }
     }
 }
 
@@ -1201,12 +1217,12 @@ int Server::RespondMESSAGEBUFFER()
     Log(string("// SENDING // " + full_msg));
     if(send(clientSock, full_msg.data(), full_msg.length(), 0) < 0)
     {
-        LogError(string("// COMMAND // Failed to send STATUSRESP to client."));
+        LogError(string("// COMMAND // Failed to send MESSAGEBUFFER to client."));
         return -1;
     }
     else
     {
-        Log(string("// COMMAND // Successfully sent STATUSRESP to server."));
+        Log(string("// COMMAND // Successfully sent MESSAGEBUFFER to client."));
         return 1;
     }
 }
