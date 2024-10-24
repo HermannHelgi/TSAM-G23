@@ -1,5 +1,8 @@
 Custom Commands:
 
+
+REMEMBER TO CHANGE PASSWORD BEFORE TURN IN!!!!!!
+
 CONNECTSERVER - <IP><PORT>
 Tells the server to try and connect to the IP address and port given. Good way to 'Hotwire' a start.
 
