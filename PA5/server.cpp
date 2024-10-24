@@ -17,42 +17,14 @@ void Server::CheckKeepalive()
         Log(string("// MESSAGE // Sending status packets."));
         for (int i = 0; i < file_descriptors.size(); i++)
         {
-            Log("// MESSAGE // Sending KEEPALIVE to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
             if (file_descriptors[i].fd != listenSock && file_descriptors[i].fd != clientSock)
             {
+                Log("// MESSAGE // Sending KEEPALIVE to: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
                 SendKEEPALIVE(file_descriptors[i].fd);
             }
         }
         last_keepalive = time(NULL);
     }
-}
-
-int Server::SendKEEPALIVE(int fd)
-{
-    string keepalive = "\x01KEEPALIVE,";
-
-    keepalive += to_string(other_groups_message_buffer[fd_to_group_name[fd]].size());
-    keepalive += '\x04';
-
-    Log(string("// SENDING // " + keepalive));
-    if (send(fd, keepalive.data(), keepalive.length(), 0) < 0)
-    {
-        LogError(string("// COMMAND // Failed to send KEEPALIVE."));
-        return -1;
-    }
-    return 1;
-}
-
-int Server::SendSTATUSREQ(int fd)
-{
-    string statusreq = "\x01STATUSREQ\x04";
-    Log(string("// SENDING // " + statusreq));
-    if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
-    {
-        LogError(string("// COMMAND // Failed to send STATUSREQ."));
-        return -1;
-    }
-    return 1;
 }
 
 void Server::CheckTimeouts()
@@ -212,7 +184,7 @@ bool Server::ConnectToServer(string ip, int port)
 
 void Server::InitializeServer()
 {
-    listenSock = open_socket(portnum); 
+    listenSock = OpenSocket(portnum); 
     Log(string("// SYSTEM // Starting listen on port " + to_string(portnum)));
 
     if(listen(listenSock, BACKLOG) < 0)
@@ -222,7 +194,7 @@ void Server::InitializeServer()
     }
 
     last_keepalive = time(NULL);
-    server_pollfd = {listenSock, POLLIN, 0};
+    struct pollfd server_pollfd = {listenSock, POLLIN, 0};
     file_descriptors.emplace_back(server_pollfd);
 }
 
@@ -412,7 +384,7 @@ void Server::Log(string message)
     cout << message << endl;
 }
 
-int Server::open_socket(int portno)
+int Server::OpenSocket(int portno)
 {
     // Open socket for specified port.
     // Returns -1 if unable to create the socket for any reason.
@@ -467,157 +439,6 @@ int Server::open_socket(int portno)
    {
       return(sock);
    }
-}
-
-void Server::StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables)
-{
-    vector<string> messages;
-    string main = buffer + '\0';
-    int SOHlocation = main.find('\x01');
-    int EOTlocation = main.find('\x04');
-
-    while (SOHlocation != string::npos && EOTlocation != string::npos)
-    {
-        messages.emplace_back(main.substr(SOHlocation + 1, EOTlocation - (SOHlocation + 1)));
-
-        SOHlocation = main.find('\x01', SOHlocation + 1);
-        EOTlocation = main.find('\x04', EOTlocation + 1);
-    }
-
-    if (messages.size() == 0)
-    {
-        LogError("// MESSAGE // Could not find SOH or EOT.");
-        messages.emplace_back(main);
-    }
-
-    for (int i = 0; i < messages.size(); i++)
-    {
-        string command;
-        main = messages[i];
-        size_t old_comma_index = 0;
-        size_t comma_index = main.find(',');
-        size_t semicomma_index = main.find(';');
-        if (comma_index != string::npos)
-        {
-            command = main.substr(0, min(comma_index, semicomma_index));
-            commands.emplace_back(command);
-
-            if (command == "SENDMSG")
-            {
-                old_comma_index = comma_index;
-                comma_index = main.find(',', (old_comma_index+1));
-                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
-                old_comma_index = comma_index;
-                comma_index = main.find(',', (old_comma_index+1));
-                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
-                old_comma_index = comma_index;
-                variables[i].emplace_back(main.substr(old_comma_index + 1));
-            }
-            else
-            {
-                while (comma_index != string::npos || semicomma_index != string::npos)
-                {
-                    old_comma_index = min(comma_index, semicomma_index);
-                    comma_index = main.find(',', (old_comma_index+1));
-                    semicomma_index = main.find(';', (old_comma_index+1));
-                    
-                    if (comma_index != std::string::npos || semicomma_index != string::npos) 
-                    {
-                        variables[i].emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
-                    } 
-                    else 
-                    {
-                        variables[i].emplace_back(main.substr(old_comma_index + 1));
-                    }
-                }
-            }
-        }
-        else
-        {
-            command = main;
-            commands.emplace_back(command);
-            vector<string> empty;
-            variables.emplace_back(empty);
-        }
-    }
-}
-
-void Server::StripClientMessage(int message_length, string &command, vector<string> &variables)
-{
-    string main = buffer + '\0';
-    size_t old_comma_index = 0;
-    size_t comma_index = main.find(',');
-    size_t semicomma_index = main.find(';');
-    if (comma_index != string::npos || semicomma_index != string::npos)
-    {
-        command = main.substr(0, min(comma_index, semicomma_index));
-        if (command == "SENDMSG")
-        {
-            old_comma_index = comma_index;
-            comma_index = main.find(',', (old_comma_index+1));
-            variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
-            old_comma_index = comma_index;
-            variables.emplace_back(main.substr(old_comma_index + 1));
-        }
-        else
-        {
-            while (comma_index != string::npos || semicomma_index != string::npos)
-            {
-                old_comma_index = min(comma_index, semicomma_index);
-                comma_index = main.find(',', (old_comma_index+1));
-                semicomma_index = main.find(';', (old_comma_index+1));
-                
-                if (comma_index != std::string::npos || semicomma_index != string::npos) 
-                {
-                    variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
-                } 
-                else 
-                {
-                    variables.emplace_back(main.substr(old_comma_index + 1));
-                }
-            }
-        }
-    }
-    else
-    {
-        command = main;
-    }
-}
-
-int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
-{
-    string passwordCheck = buffer;
-    if (password == passwordCheck)
-    {
-        clientSock = socketNum;
-        connection_names.emplace_back(client_name);
-        struct sockaddr_in sin;
-        socklen_t len = sizeof(sin);
-        if (getpeername(clientSock, (struct sockaddr*)&sin, &len) < 0)
-        {
-            LogError("// SYSTEM // GetPeerName Function failed.");
-            return -1;
-        }
-        else
-        {
-            helo_received[clientSock] = 1;
-            fd_to_group_name[clientSock] = client_name;
-            group_name_to_fd[client_name] = clientSock;
-            string ip_address = inet_ntoa(sin.sin_addr);
-            list_of_connections[client_name] = {ip_address, ntohs(sin.sin_port)};
-            Log(string("// COMMAND // CLIENT has been tied to: " + ip_address));
-        }
-        return 1;
-    }
-    return -1;
-}
-
-int Server::SendHELO(int fd)
-{
-    string helo = "\x01HELO," + group_name + '\x04';
-    Log(string("// SENDING // " + helo));
-    send(fd, helo.data(), helo.size(), 0);
-    return 1;
 }
 
 int Server::ReceiveServerCommand(int message_length, int fd)
@@ -711,6 +532,115 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     return 1;
 }
 
+void Server::StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables)
+{
+    vector<string> messages;
+    string main = buffer + '\0';
+    int SOHlocation = main.find('\x01');
+    int EOTlocation = main.find('\x04');
+
+    while (SOHlocation != string::npos && EOTlocation != string::npos)
+    {
+        messages.emplace_back(main.substr(SOHlocation + 1, EOTlocation - (SOHlocation + 1)));
+
+        SOHlocation = main.find('\x01', SOHlocation + 1);
+        EOTlocation = main.find('\x04', EOTlocation + 1);
+    }
+
+    if (messages.size() == 0)
+    {
+        LogError("// MESSAGE // Could not find SOH or EOT.");
+        messages.emplace_back(main);
+    }
+
+    for (int i = 0; i < messages.size(); i++)
+    {
+        string command;
+        main = messages[i];
+        size_t old_comma_index = 0;
+        size_t comma_index = main.find(',');
+        size_t semicomma_index = main.find(';');
+        if (comma_index != string::npos)
+        {
+            command = main.substr(0, min(comma_index, semicomma_index));
+            commands.emplace_back(command);
+
+            if (command == "SENDMSG")
+            {
+                old_comma_index = comma_index;
+                comma_index = main.find(',', (old_comma_index+1));
+                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+                old_comma_index = comma_index;
+                comma_index = main.find(',', (old_comma_index+1));
+                variables[i].emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+                old_comma_index = comma_index;
+                variables[i].emplace_back(main.substr(old_comma_index + 1));
+            }
+            else
+            {
+                while (comma_index != string::npos || semicomma_index != string::npos)
+                {
+                    old_comma_index = min(comma_index, semicomma_index);
+                    comma_index = main.find(',', (old_comma_index+1));
+                    semicomma_index = main.find(';', (old_comma_index+1));
+                    
+                    if (comma_index != std::string::npos || semicomma_index != string::npos) 
+                    {
+                        variables[i].emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
+                    } 
+                    else 
+                    {
+                        variables[i].emplace_back(main.substr(old_comma_index + 1));
+                    }
+                }
+            }
+        }
+        else
+        {
+            command = main;
+            commands.emplace_back(command);
+            vector<string> empty;
+            variables.emplace_back(empty);
+        }
+    }
+}
+
+int Server::SendKEEPALIVE(int fd)
+{
+    string keepalive = "\x01KEEPALIVE,";
+
+    keepalive += to_string(other_groups_message_buffer[fd_to_group_name[fd]].size());
+    keepalive += '\x04';
+
+    Log(string("// SENDING // " + keepalive));
+    if (send(fd, keepalive.data(), keepalive.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send KEEPALIVE."));
+        return -1;
+    }
+    return 1;
+}
+
+int Server::SendSTATUSREQ(int fd)
+{
+    string statusreq = "\x01STATUSREQ\x04";
+    Log(string("// SENDING // " + statusreq));
+    if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send STATUSREQ."));
+        return -1;
+    }
+    return 1;
+}
+
+int Server::SendHELO(int fd)
+{
+    string helo = "\x01HELO," + group_name + '\x04';
+    Log(string("// SENDING // " + helo));
+    send(fd, helo.data(), helo.size(), 0);
+    return 1;
+}
+
 int Server::RespondSTATUSRESP(int fd, vector<string> variables)
 {
     for (int i = 0; i < variables.size(); i++)
@@ -744,29 +674,6 @@ int Server::RespondSTATUSREQ(int fd)
     else
     {
         Log(string("// COMMAND // Successfully sent STATUSRESP to server: " + fd_to_group_name[fd] + " : " + to_string(fd)));
-        return 1;
-    }
-}
-
-int Server::RespondMESSAGEBUFFER()
-{
-    string full_msg = "MESSAGEBUFFER";
-    map<string, queue<string>>::iterator it;
-
-    for (it = our_message_buffer.begin(); it != our_message_buffer.end(); it++)
-    {
-        full_msg += ", " + it->first + ", " + to_string(it->second.size());
-    }
-
-    Log(string("// SENDING // " + full_msg));
-    if(send(clientSock, full_msg.data(), full_msg.length(), 0) < 0)
-    {
-        LogError(string("// COMMAND // Failed to send STATUSRESP to client."));
-        return -1;
-    }
-    else
-    {
-        Log(string("// COMMAND // Successfully sent STATUSRESP to server."));
         return 1;
     }
 }
@@ -1003,79 +910,6 @@ int Server::SendSERVERS(int fd)
     }
 }
 
-int Server::RespondGetMSG(string group_id)
-{
-    string send_buffer;
-
-    //Check if the group has ever sent anything
-    if(our_message_buffer.find(group_id) != our_message_buffer.end()) 
-    {
-        //There is a stored messages
-        if(our_message_buffer[group_id].size() > 0)
-        {
-            LogError(our_message_buffer[group_id].front());
-            send_buffer += our_message_buffer[group_id].front();
-            our_message_buffer[group_id].pop();
-
-            Log(string("// CLIENT // Group: " + group_id + " Has a messages for client. Responding to client"));
-            Log(string("// SENDING // " + string(send_buffer)));
-            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
-            {
-                LogError(string("// CLIENT // Failed to send message to client from group: " + group_id));
-                return -1;
-            }
-            else
-            {
-                Log(string("// CLIENT // Group: " + group_id + " has a message for client. Replied to Client Suceeded."));
-                return 1;
-            }
-            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
-        }
-        else
-        {
-            //No messages stored from group
-            Log(string("// CLIENT // Group: " + group_id + " Has no messages for client. Responding to client"));
-            send_buffer += ("Currently no messages from group: " + group_id +".");
-            //Respond with there being no messages
-            Log(string("// SENDING // " + string(send_buffer)));
-            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
-            {
-                LogError(string("// CLIENT // Failed to send no message from group: " + group_id));
-                return -1;
-            }
-            else
-            {
-                Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
-                return 1;
-            }
-            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
-        }
-
-    }
-    else
-    {
-        //Group has never connected
-        Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Responding to client"));
-        send_buffer += ("Group: " + group_id +" has never sent a message.");
-
-        //Responding to client that group has never tried sending
-        Log(string("// SENDING // " + string(send_buffer)));
-        if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
-        {
-            LogError(string("// CLIENT // Failed to send never messaged from group: " + group_id)); 
-            return -1;
-        }
-        else
-        {
-            Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
-            return 1;
-        }
-            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
-    }
-    LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
-    return -1;
-}
-
 // Process command from client on the server
 int Server::ReceiveClientCommand(int message_length)
 {
@@ -1180,6 +1014,172 @@ int Server::ReceiveClientCommand(int message_length)
         return -1;
     }
     return 1;
+}
+
+void Server::StripClientMessage(int message_length, string &command, vector<string> &variables)
+{
+    string main = buffer + '\0';
+    size_t old_comma_index = 0;
+    size_t comma_index = main.find(',');
+    size_t semicomma_index = main.find(';');
+    if (comma_index != string::npos || semicomma_index != string::npos)
+    {
+        command = main.substr(0, min(comma_index, semicomma_index));
+        if (command == "SENDMSG")
+        {
+            old_comma_index = comma_index;
+            comma_index = main.find(',', (old_comma_index+1));
+            variables.emplace_back(main.substr(old_comma_index + 1, comma_index - old_comma_index - 1));
+            old_comma_index = comma_index;
+            variables.emplace_back(main.substr(old_comma_index + 1));
+        }
+        else
+        {
+            while (comma_index != string::npos || semicomma_index != string::npos)
+            {
+                old_comma_index = min(comma_index, semicomma_index);
+                comma_index = main.find(',', (old_comma_index+1));
+                semicomma_index = main.find(';', (old_comma_index+1));
+                
+                if (comma_index != std::string::npos || semicomma_index != string::npos) 
+                {
+                    variables.emplace_back(main.substr(old_comma_index + 1, min(comma_index, semicomma_index) - old_comma_index - 1));
+                } 
+                else 
+                {
+                    variables.emplace_back(main.substr(old_comma_index + 1));
+                }
+            }
+        }
+    }
+    else
+    {
+        command = main;
+    }
+}
+
+int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
+{
+    string passwordCheck = buffer;
+    if (password == passwordCheck)
+    {
+        clientSock = socketNum;
+        connection_names.emplace_back(client_name);
+        struct sockaddr_in sin;
+        socklen_t len = sizeof(sin);
+        if (getpeername(clientSock, (struct sockaddr*)&sin, &len) < 0)
+        {
+            LogError("// SYSTEM // GetPeerName Function failed.");
+            return -1;
+        }
+        else
+        {
+            helo_received[clientSock] = 1;
+            fd_to_group_name[clientSock] = client_name;
+            group_name_to_fd[client_name] = clientSock;
+            string ip_address = inet_ntoa(sin.sin_addr);
+            list_of_connections[client_name] = {ip_address, ntohs(sin.sin_port)};
+            Log(string("// COMMAND // CLIENT has been tied to: " + ip_address));
+        }
+        return 1;
+    }
+    return -1;
+}
+
+int Server::RespondGetMSG(string group_id)
+{
+    string send_buffer;
+
+    //Check if the group has ever sent anything
+    if(our_message_buffer.find(group_id) != our_message_buffer.end()) 
+    {
+        //There is a stored messages
+        if(our_message_buffer[group_id].size() > 0)
+        {
+            LogError(our_message_buffer[group_id].front());
+            send_buffer += our_message_buffer[group_id].front();
+            our_message_buffer[group_id].pop();
+
+            Log(string("// CLIENT // Group: " + group_id + " Has a messages for client. Responding to client"));
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send message to client from group: " + group_id));
+                return -1;
+            }
+            else
+            {
+                Log(string("// CLIENT // Group: " + group_id + " has a message for client. Replied to Client Suceeded."));
+                return 1;
+            }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+        }
+        else
+        {
+            //No messages stored from group
+            Log(string("// CLIENT // Group: " + group_id + " Has no messages for client. Responding to client"));
+            send_buffer += ("Currently no messages from group: " + group_id +".");
+            //Respond with there being no messages
+            Log(string("// SENDING // " + string(send_buffer)));
+            if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
+            {
+                LogError(string("// CLIENT // Failed to send no message from group: " + group_id));
+                return -1;
+            }
+            else
+            {
+                Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
+                return 1;
+            }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+        }
+
+    }
+    else
+    {
+        //Group has never connected
+        Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Responding to client"));
+        send_buffer += ("Group: " + group_id +" has never sent a message.");
+
+        //Responding to client that group has never tried sending
+        Log(string("// SENDING // " + string(send_buffer)));
+        if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
+        {
+            LogError(string("// CLIENT // Failed to send never messaged from group: " + group_id)); 
+            return -1;
+        }
+        else
+        {
+            Log(string("// CLIENT // Group: " + group_id + " has never sent a message. Replied to Client Suceeded."));
+            return 1;
+        }
+            LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+    }
+    LogError(string("// UNKNOWN // Something failed when responding to GETMSG from Client"));
+    return -1;
+}
+
+int Server::RespondMESSAGEBUFFER()
+{
+    string full_msg = "MESSAGEBUFFER";
+    map<string, queue<string>>::iterator it;
+
+    for (it = our_message_buffer.begin(); it != our_message_buffer.end(); it++)
+    {
+        full_msg += ", " + it->first + ", " + to_string(it->second.size());
+    }
+
+    Log(string("// SENDING // " + full_msg));
+    if(send(clientSock, full_msg.data(), full_msg.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send STATUSRESP to client."));
+        return -1;
+    }
+    else
+    {
+        Log(string("// COMMAND // Successfully sent STATUSRESP to server."));
+        return 1;
+    }
 }
 
 int Server::RespondCONNECTSERVER(vector<string> variables)

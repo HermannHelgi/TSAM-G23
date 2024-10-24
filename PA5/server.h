@@ -23,7 +23,6 @@
 #include <thread>
 #include <fcntl.h>
 
-
 #ifndef SOCK_NONBLOCK
 #include <fcntl.h>
 #define SOCK_NONBLOCK O_NONBLOCK
@@ -34,16 +33,14 @@ using namespace std;
 // MESSAGE TAGS FOR LOGS:
 // SYSTEM - CONNECT, MESSAGE, CLIENT, DISCONNECT, COMMAND, UNKNOWN
 
-//SYSTEM: For if some function that the server relies on fails, Example binding a socket 
-//CONNECT: Logs Relating to attempting connection
-//MESSAGE: Something has been recived and needs to be parsed
-//CLIENT: Logs specificly related to the client
-//DISCONNECT: If a disconnect occurs
-//COMMAND; Relating to commands (fails or succesful executions)
-//UNKNOWN: essentaily misc, if something unknown or unexpected happens
-//SENDING: Whenever a message is sent, it should have the sending tag.
-
-
+// SYSTEM: For if some library function that the server relies on fails, Example binding a socket 
+// CONNECT: Logs Relating to attempted connection
+// MESSAGE: Something has been recived and needs to be parsed
+// CLIENT: Logs specifically related to the client
+// DISCONNECT: If a disconnect occurs
+// COMMAND; Relating to commands (fails or successful executions)
+// UNKNOWN: Essentaily misc, if something unknown or unexpected happens
+// SENDING: Whenever a message is sent.
 
 class Server
 {
@@ -51,37 +48,31 @@ public:
     Server(int portnumber, string password);
     ~Server();
 
+    // Main Server functions
     void InitializeServer();
-    void CheckForMoreConnections();
-    bool ConnectToServer(string ip, int port);
+    int CheckMessages();
     void CheckTimeouts();
     void CheckKeepalive();
+    void CheckForMoreConnections();
 
+    // Helper Functions
+    bool ConnectToServer(string ip, int port);
     void ClearBuffer();
-    int CheckMessages();
     void Log(string message);
     void LogError(string message);
-    int open_socket(int portno);
-    void StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables);
-    void StripClientMessage(int message_length, string &command, vector<string> &variables);
-    int CheckClientPassword(string password, int &clientSock, int socketNum);
-
-    // May wanna change this to simply be each individual command/message
-    int ReceiveClientCommand(int message_length);
-    int ReceiveServerCommand(int message_length, int fd);
+    int OpenSocket(int portno);
     
+    // Botnet commands. 
+    // Respond means that the server is usually taking in some data and sending something back.
+    // Send means the server just sends that command.
+    int ReceiveServerCommand(int message_length, int fd);
+    void StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables);
     int RespondHELO(int fd, vector<string> variables);
     int RespondKEEPALIVE(int fd, vector<string> variables);
     int RespondGETMSGS(int fd, vector<string> variables);
-    int RespondLISTSERVERS();
     int RespondSERVERS(vector<string> variables);
     int RespondSTATUSREQ(int fd);
     int RespondSTATUSRESP(int fd, vector<string> variables);
-
-    int RespondCONNECTSERVER(vector<string> variables);
-    int RespondGetMSG(string group_id); // For the Client only. It reads from our_message_buffer;
-    int RespondMESSAGEBUFFER();
-    int RespondDOCSERVERS();
 
     int SendHELO(int fd);
     int SendSERVERS(int fd);
@@ -89,45 +80,61 @@ public:
     int SendGETMSGS(int fd);
     int SendSENDMSG(int fd, string to_group_name, string from_group_name, string data);
     int SendSTATUSREQ(int fd);
+    
+    // Client commands.
+    int ReceiveClientCommand(int message_length);
+    void StripClientMessage(int message_length, string &command, vector<string> &variables);
+    int CheckClientPassword(string password, int &clientSock, int socketNum);
+    
+    int RespondLISTSERVERS();
+    int RespondCONNECTSERVER(vector<string> variables);
+    int RespondGetMSG(string group_id);             // For the Client only. It reads from our_message_buffer;
+    int RespondMESSAGEBUFFER();
+    int RespondDOCSERVERS();
+    
+    // Variables.
+    int connected_servers = 0;                      // How many bots are connected.
+    int max_server_capacity = 8;                    // How many bots the server should be connected to.
+    int min_server_capacity = 4;                    // The minimum amount of bots the server should keep in contact with. 
+    int max_variables = 10000;                      // Ceiling on amount of variables another bot can send.
 
-    int connected_servers = 0;
-    int max_server_capacity = 8;
-    int min_server_capacity = 4;
-    int max_variables = 10000;
+    double keepalive_frequency = 60;                // How often the server sends a KEEPALIVE message.
+    time_t last_keepalive;                          // Last time the server sent a keepalive.
+    int listenSock;                                 // Socket for connections to server
+    int portnum;                                    // The servers port number.
+    int timeout = 100;                              // Timeout for Poll()
 
-    double expiration_of_servers = 300;
-    double keepalive_frequency = 60;
-    time_t last_keepalive;
-    int listenSock;                 // Socket for connections to server
-    int portnum;
-    int timeout = 100;               // Timeout for Poll()
-
-    int new_socket;                 // Temp variables for accepting new connections.
-    struct sockaddr_in address;
+    int new_socket;                                 // Temp variables for accepting new connections.
+    struct sockaddr_in address;     
     int addrlen = sizeof(address);
 
-    int clientSock = INT32_MAX;                 // Socket of connecting client
+    int clientSock = INT32_MAX;                     // Socket of connecting client, if its set to INT32_MAX that means no client is present.
     struct sockaddr_in client;
     socklen_t clientLen;
 
-    struct pollfd server_pollfd;
-    
-    char buffer[5120];              // buffer for reading from clients
-    int buffer_size = 5120;
-    vector<pollfd> file_descriptors;
-    vector<string> connection_names;
+    char buffer[5120];                              // buffer for reading from clients
+    int buffer_size = 5120;                         // Size of buffer;
+    vector<pollfd> file_descriptors;                // Vector of all file descriptors.
+    vector<string> connection_names;                // Vector of names of all connected bots.
+
+    // Map of all connections, including the name of the group, their IP and PORT.
     map<string, pair<string, int>> list_of_connections; // Key : Name of group - Value: Pair(String of IP, Int port number)
+
+    // Map of all documented connections gained from SERVERS command, including the name of the group, their IP and PORT. Used to connect to new servers.
     map<string, pair<string, int>> documented_servers; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
-    map<string, queue<string>> our_message_buffer; // Stores messages for ourselves.°
-    map<int, time_t> socket_timers;
-    map<int, int> helo_received;
-    map<int, string> fd_to_group_name; 
-    map<string, int> group_name_to_fd; 
+    map<string, queue<string>> our_message_buffer;  // Stores messages for ourselves.
 
+    map<int, time_t> socket_timers;                 // Timers for all bots, updates whenever a specific bot sends a message. 
+    double expiration_of_servers = 300;             // Timeout on bots, if they have been silent for longer than this time (in seconds) they are disconnected.
+    map<int, int> helo_received;                    // Map of whether a new bot has sent a HELO message or not.
+    map<int, string> fd_to_group_name;              // Map to translate File descriptor to the group name
+    map<string, int> group_name_to_fd;              // Map to translate group name to File descriptor
+
+    // Name variables and presets.
     string group_name = "A5_23";
     string client_name = "CLIENT";
-    string client_password;                // Responses and basic strings.
+    string client_password; 
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";
 
