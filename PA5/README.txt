@@ -2,6 +2,7 @@ Custom Commands:
 
 
 REMEMBER TO CHANGE PASSWORD BEFORE TURN IN!!!!!!
+Server has hardcoded IP address :S
 
 CONNECTSERVER - <IP><PORT>
 Tells the server to try and connect to the IP address and port given. Good way to 'Hotwire' a start.

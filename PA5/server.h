@@ -133,7 +133,8 @@ public:
     map<string, int> group_name_to_fd;              // Map to translate group name to File descriptor
 
     // Name variables and presets.
-    string server_ip;
+    string ip_address = "130.208.246.249";
+    string localhost = "127.0.0.1";
     string group_name = "A5_23";
     string client_name = "CLIENT";
     string client_password = "ASSDESTROYER"; 

@@ -87,7 +87,7 @@ void Server::CheckForMoreConnections()
                 it++;
                 continue;
             }
-            else if (it->first != group_name && it->second.second != portnum)
+            else if (it->first != group_name && (it->second.second != portnum || (it->second.first != ip_address && it->second.first != localhost)))
             {
                 // CAN CONNECT
                 string server_ip = it->second.first;
@@ -908,7 +908,7 @@ int Server::SendGETMSGS(int fd)
 //Sends a list servers to the given file_descriptor
 int Server::SendSERVERS(int fd)
 {
-    string send_buffer = "\x01SERVERS,";
+    string send_buffer = "\x01SERVERS," + group_name + "," + ip_address + "," + to_string(portnum);
     size_t pos = 0;
     string group_info;
 
@@ -1096,7 +1096,7 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
         if (getpeername(clientSock, (struct sockaddr*)&sin, &len) < 0)
         {
             LogError("// SYSTEM // GetPeerName Function failed.");
-            return -1;
+            return -2;
         }
         else
         {
