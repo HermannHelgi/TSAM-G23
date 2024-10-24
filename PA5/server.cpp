@@ -908,7 +908,7 @@ int Server::SendGETMSGS(int fd)
 //Sends a list servers to the given file_descriptor
 int Server::SendSERVERS(int fd)
 {
-    string send_buffer = "\x01SERVERS," + group_name + "," + ip_address + "," + to_string(portnum);
+    string send_buffer = "\x01SERVERS," + group_name + "," + ip_address + "," + to_string(portnum) + ";";
     size_t pos = 0;
     string group_info;
 
