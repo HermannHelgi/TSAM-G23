@@ -663,7 +663,10 @@ int Server::RespondSTATUSREQ(int fd)
 
     for (it = other_groups_message_buffer.begin(); it != other_groups_message_buffer.end(); it++)
     {
-        full_msg += "," + it->first + "," + to_string(it->second.size());
+        if (it->second.size() != 0)
+        {
+            full_msg += "," + it->first + "," + to_string(it->second.size());
+        }
     }
 
     full_msg += '\x04';
