@@ -82,9 +82,9 @@ void Server::CheckForMoreConnections()
 
         while (it != documented_servers.end())
         {
-            if (list_of_connections.count(it->first))
+            if (list_of_connections.count(it->first) || find(pending_connections.begin(), pending_connections.end(), it->first) != pending_connections.end())
             {
-                // ALREADY CONNECTED
+                // ALREADY CONNECTED / PENDING
                 it++;
                 continue;
             }
@@ -95,6 +95,7 @@ void Server::CheckForMoreConnections()
                 int server_port = it->second.second;
 
                 Log(string("// CONNECT // Attempting new connection with documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port)));
+                pending_connections.emplace_back(it->first);
                 if (ConnectToServer(server_ip, server_port))
                 {
                     Log(string("// CONNECT // New connection established with: " + it->first));
@@ -833,6 +834,12 @@ int Server::RespondHELO(int fd, vector<string> variables)
             string ip_address = inet_ntoa(sin.sin_addr);
             list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
             documented_servers[variables[0]] = {ip_address, ntohs(sin.sin_port)};
+            
+            auto it = find(pending_connections.begin(), pending_connections.end(), variables[0]);
+            if (it != pending_connections.end())
+            {
+                pending_connections.erase(it);
+            }
             Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
         }
 

@@ -124,10 +124,11 @@ public:
     map<string, pair<string, int>> documented_servers; // Key : Name of group - Value: Pair(String of IP, Int port number)
     map<string, vector<pair<string, string>>> other_groups_message_buffer; // Stores messages for other groups. Key: Name of group - Value: list of pairs(From group name, message)
     map<string, queue<string>> our_message_buffer;  // Stores messages for ourselves.
+    vector<string> pending_connections;             // Used to prevent the server from trying to connect to the same bot twice.
 
     map<int, time_t> socket_timers;                 // Timers for all bots, updates whenever a specific bot sends a message. 
     double expiration_of_servers = 300;             // Timeout on bots, if they have been silent for longer than this time (in seconds) they are disconnected.
-    map<int, int> helo_received;                    // Map of whether a new bot has sent a HELO message or not.
+    map<int, int> helo_received;                    // Map of whether a new bot has sent a HELO message or not. -1 == no, 1 == yes.
     map<int, string> fd_to_group_name;              // Map to translate File descriptor to the group name
     map<string, int> group_name_to_fd;              // Map to translate group name to File descriptor
 
