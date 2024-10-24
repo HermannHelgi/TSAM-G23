@@ -178,6 +178,7 @@ bool Server::ConnectToServer(string ip, int port)
     struct pollfd new_pollfd = {outboundSocket, POLLIN, 0};
     file_descriptors.push_back(new_pollfd);
     helo_received[new_pollfd.fd] = -1;
+    socket_timers[new_pollfd.fd] = time(NULL);
     Log(string("// CONNECT // New server connected on: ") + ip + " : " + to_string(new_pollfd.fd));
     SendHELO(new_pollfd.fd);
     return true;
