@@ -13,6 +13,9 @@ Gives list of how many messages the server has in the client buffer for messages
 DOCSERVERS
 Gives list of all documented servers.
 
+GetAll Messages?
+Disconnect from some group?
+
 
 Two error codes:
 

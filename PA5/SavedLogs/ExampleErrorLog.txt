@@ -1,0 +1,55 @@
+[2024-10-24 15:58:48] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:00:08] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:00:08] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-24 16:18:32] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
+[2024-10-24 16:19:02] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
+[2024-10-24 16:19:42] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
+[2024-10-24 16:19:49] Be aware of scams: Hi, my address is NOT 130.208.246.249,39332, but 130.208.246.249,4400
+[2024-10-24 16:19:53] Be aware of scams: Hi, my address is NOT 130.208.246.249,39332, but 130.208.246.249,4400
+[2024-10-24 16:20:23] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:20:23] KEEPALIVE,0
+[2024-10-24 16:21:23] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:21:23] KEEPALIVE,0
+[2024-10-24 16:21:59] Hello from A5_3!!!
+[2024-10-24 16:22:23] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:22:23] KEEPALIVE,0
+[2024-10-24 16:23:23] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:23:23] KEEPALIVE,0
+[2024-10-24 16:27:34] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:30:04] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:30:04] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:30:04] SENDMSG,A5_42,A5_9,lol
+[2024-10-24 16:31:54] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:31:54] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:31:54] GETMSGS,A5_9
+[2024-10-24 16:32:31] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:32:40] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:34:40] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:34:40] // COMMAND // Not connected to group: A5_14
+[2024-10-24 16:36:21] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:37:44] // MESSAGE // Could not find SOH or EOT.
+[2024-10-24 16:38:46] hello
+[2024-10-24 16:46:16] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:46:16] KEEPALIVE,0
+[2024-10-24 16:47:16] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:47:16] KEEPALIVE,0
+[2024-10-24 16:48:16] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:48:16] KEEPALIVE,0
+[2024-10-24 16:49:16] // UNKNOWN // Failed to process command from server: 6
+[2024-10-24 16:49:16] KEEPALIVE,0
