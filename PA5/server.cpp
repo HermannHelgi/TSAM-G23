@@ -790,17 +790,29 @@ int Server::RespondGETMSGS(int fd, vector<string> variables)
 {
     if (variables.size() >= 1)
     {
-        Log(string("// COMMAND // Group variables detected, attempting to send messages. Count: " + to_string(variables.size())));
+        Log(string("// COMMAND // Group variables detected, attempting to send messages."));
         for (int i = 0; i < variables.size(); i++)
         {
+            Log("// COMMAND // GETMSGS asked for group: " + variables[i]);
             if (other_groups_message_buffer.find(variables[i]) != other_groups_message_buffer.end())
             {
-                for (int j = 0; j < other_groups_message_buffer[variables[i]].size(); j++)
+                if (other_groups_message_buffer[variables[i]].size() == 0)
                 {
-                    //              TO_GROUP      FROM_GROUP                                          DATA 
-                    SendSENDMSG(fd, variables[i], other_groups_message_buffer[variables[i]][j].first, other_groups_message_buffer[variables[i]][j].second);
-                    // Doesn't matter if it fails methinks
+                    Log("// COMMAND // Buffer for specified group: " + variables[i] + " is empty.");
                 }
+                else
+                {
+                    for (int j = 0; j < other_groups_message_buffer[variables[i]].size(); j++)
+                    {
+                        //              TO_GROUP      FROM_GROUP                                          DATA 
+                        SendSENDMSG(fd, variables[i], other_groups_message_buffer[variables[i]][j].first, other_groups_message_buffer[variables[i]][j].second);
+                        // Doesn't matter if it fails methinks
+                    }
+                }
+            }
+            else
+            {
+                Log("// COMMAND // Have never received message for specified group: " + variables[i]);
             }
             vector<pair<string, string>> new_vec;
             other_groups_message_buffer[variables[i]] = new_vec;
