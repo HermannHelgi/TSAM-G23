@@ -317,6 +317,7 @@ int Server::CheckMessages()
                         {
                             Log(string("// COMMAND // New command from Server: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd)));
                             int val = ReceiveServerCommand(valread, file_descriptors[i].fd);
+                            time_t old_time = socket_timers[file_descriptors[i].fd];
                             socket_timers[file_descriptors[i].fd] = time(NULL);
 
                             if (val == 2 && clientSock == INT32_MAX) // Might be client trying to connect.
@@ -343,6 +344,7 @@ int Server::CheckMessages()
                             }
                             else if (val == -1)
                             {
+                                socket_timers[file_descriptors[i].fd] = old_time;
                                 LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                 LogError(string(buffer));
                                 Log(string("// SENDING // " + errorMessage));
@@ -442,7 +444,7 @@ int Server::OpenSocket(int portno)
       return(sock);
    }
 }
-
+ 
 int Server::ReceiveServerCommand(int message_length, int fd)
 {
     vector<string> commands;
@@ -521,13 +523,12 @@ int Server::ReceiveServerCommand(int message_length, int fd)
         }
         else
         {
-            // DO NOT LOG UNKOWN MESSAGES HERE! OTHERWISE IT MIGHT LEAK THE PASSWORD TO THE LOG FILE WHICH ANYONE CAN READ!!!  
             return -1;
         }
 
-        if (error_code == -1)
+        if (error_code == -1 || error_code == -2)
         {
-            return -1;
+            return error_code;
         }
     }
     Log("// COMMAND // Finished commands list.");
@@ -677,7 +678,7 @@ int Server::RespondSTATUSREQ(int fd)
     if(send(fd, full_msg.data(), full_msg.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send STATUSRESP to server: " + fd_to_group_name[fd] + " : " + to_string(fd)));
-        return -1;
+        return -2;
     }
     else
     {
@@ -708,7 +709,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
                 LogError(string("// COMMAND // Failed sending message to group: " + to_group_name));
                 Log(string("// COMMAND // Storing message"));
                 other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
-                return -1;
+                return -2;
             }
             else
             {
@@ -729,7 +730,7 @@ int Server::SendSENDMSG(int fd, string to_group_name, string from_group_name, st
                     LogError(string("// COMMAND // Failed sending message to group: " + to_group_name));
                     Log(string("// COMMAND // Storing message"));
                     other_groups_message_buffer[to_group_name].push_back({from_group_name,data});
-                    return -1;
+                    return -2;
                 }
                 else
                 {
@@ -843,7 +844,7 @@ int Server::RespondHELO(int fd, vector<string> variables)
         if (getpeername(fd, (struct sockaddr*)&sin, &len) < 0)
         {
             LogError("// SYSTEM // GetPeerName Function failed: " + string(strerror(errno)));
-            return -1;
+            return -2;
         }
         else
         {
@@ -883,7 +884,7 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
         else
         {
             Log("// COMMAND // KEEPALIVE from " + fd_to_group_name[fd] + " : " + to_string(fd) + " is empty. ");
-            return 0;
+            return 1;
         }
     }
     else
@@ -900,7 +901,7 @@ int Server::SendGETMSGS(int fd)
     if (send(fd, statusreq.data(), statusreq.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send GETMSGS"));
-        return -1;
+        return -2;
     }
     return 1;
 }
@@ -927,7 +928,7 @@ int Server::SendSERVERS(int fd)
     if(send(fd, send_buffer.data(), send_buffer.length(), 0) < 0)
     {
         LogError(string("// COMMAND // Failed to send list of servers"));
-        return -1;
+        return -2;
     }
     else
     {
