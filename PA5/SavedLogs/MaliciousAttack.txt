@@ -1,0 +1,737 @@
+[2024-10-24 14:35:50] // SYSTEM // Starting listen on port 4123
+[2024-10-24 14:36:04] // CONNECT // New connection trying to be made.
+[2024-10-24 14:36:04] // CONNECT // New connection made: 4
+[2024-10-24 14:36:04] // SENDING // HELO,A5_23
+[2024-10-24 14:36:10] // MESSAGE // New message received from:  : 4
+[2024-10-24 14:36:10] // COMMAND // New command from Server:  : 4
+[2024-10-24 14:36:10] // CLIENT // Detected CLIENT password.
+[2024-10-24 14:36:10] // COMMAND // CLIENT has been tied to: 130.208.240.15
+[2024-10-24 14:36:10] // CLIENT // New client recognized: 4
+[2024-10-24 14:36:10] // SENDING // Welcome [CLIENT], how can I help you today?
+[2024-10-24 14:36:15] // CONNECT // New connection trying to be made.
+[2024-10-24 14:36:15] // CONNECT // New connection made: 5
+[2024-10-24 14:36:15] // SENDING // HELO,A5_23
+[2024-10-24 14:36:15] // MESSAGE // New message received from:  : 5
+[2024-10-24 14:36:15] // COMMAND // New command from Server:  : 5
+[2024-10-24 14:36:15] // COMMAND // HELO,A5_199
+[2024-10-24 14:36:15] // COMMAND // New command: HELO
+[2024-10-24 14:36:15] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:15] // COMMAND // Group A5_199 has been tied to: 130.208.224.226
+[2024-10-24 14:36:15] // SENDING // SERVERS,A5_199,130.208.224.226,52864;
+[2024-10-24 14:36:15] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:15] // COMMAND // Finished commands list.
+[2024-10-24 14:36:17] // MESSAGE // New message received from: A5_199 : 5
+[2024-10-24 14:36:17] // DISCONNECT // Server Disconnected: A5_199 : 5
+[2024-10-24 14:36:19] // MESSAGE // New message received from: CLIENT : 4
+[2024-10-24 14:36:19] // CLIENT // New command from Client: 4
+[2024-10-24 14:36:19] // CLIENT // Attempting to connect to server specified by client.
+[2024-10-24 14:36:19] // CONNECT // New server connected on: 130.208.246.249 : 5
+[2024-10-24 14:36:19] // SENDING // HELO,A5_23
+[2024-10-24 14:36:19] // CLIENT // Successfully connected to specified server.
+[2024-10-24 14:36:19] // SENDING // Successfully connected to specified server.
+[2024-10-24 14:36:19] // MESSAGE // New message received from:  : 5
+[2024-10-24 14:36:19] // COMMAND // New command from Server:  : 5
+[2024-10-24 14:36:19] // COMMAND // HELO,Instr_1
+[2024-10-24 14:36:19] // COMMAND // New command: HELO
+[2024-10-24 14:36:19] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // Group Instr_1 has been tied to: 130.208.246.249
+[2024-10-24 14:36:19] // SENDING // SERVERS,Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:19] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:36:19] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:36:19] // COMMAND // SERVERS,Instr_1,130.208.246.249,5001;Instr_2,130.208.246.249,5002;A5_18,46.182.188.14,-1;A5_169,130.208.246.249,4169;NUMBER,130.208.246.249,5005;A5_74,130.208.246.249,4074;A5_3,130.208.246.249,4003;A5_5,130.208.246.249,4005;A5_69,130.208.246.249,4069;A5_100,130.208.246.249,4025;A5_34,130.208.246.249,4034;A5_23,130.208.246.249,-1;A5_89,89.17.141.224,-1;
+[2024-10-24 14:36:19] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:19] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: Instr_2 IP: 130.208.246.249 Port: 5002 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: NUMBER IP: 130.208.246.249 Port: 5005 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_74 IP: 130.208.246.249 Port: 4074 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_3 IP: 130.208.246.249 Port: 4003 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_69 IP: 130.208.246.249 Port: 4069 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_100 IP: 130.208.246.249 Port: 4025 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_34 IP: 130.208.246.249 Port: 4034 documented.
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // CONNECT // Attempting new connection with documented server: A5_100 : 130.208.246.249 : 4025
+[2024-10-24 14:36:19] // CONNECT // New server connected on: 130.208.246.249 : 6
+[2024-10-24 14:36:19] // SENDING // HELO,A5_23
+[2024-10-24 14:36:19] // CONNECT // New connection established with: A5_100
+[2024-10-24 14:36:19] // CONNECT // Attempting new connection with documented server: A5_169 : 130.208.246.249 : 4169
+[2024-10-24 14:36:19] // CONNECT // New server connected on: 130.208.246.249 : 7
+[2024-10-24 14:36:19] // SENDING // HELO,A5_23
+[2024-10-24 14:36:19] // CONNECT // New connection established with: A5_169
+[2024-10-24 14:36:19] // MESSAGE // New message received from:  : 6
+[2024-10-24 14:36:19] // COMMAND // New command from Server:  : 6
+[2024-10-24 14:36:19] // COMMAND // HELO,A5_100
+[2024-10-24 14:36:19] // COMMAND // New command: HELO
+[2024-10-24 14:36:19] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // Group A5_100 has been tied to: 130.208.246.249
+[2024-10-24 14:36:19] // SENDING // SERVERS,A5_100,130.208.246.249,4025;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:19] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // CONNECT // Attempting new connection with documented server: A5_3 : 130.208.246.249 : 4003
+[2024-10-24 14:36:19] // CONNECT // New server connected on: 130.208.246.249 : 8
+[2024-10-24 14:36:19] // SENDING // HELO,A5_23
+[2024-10-24 14:36:19] // CONNECT // New connection established with: A5_3
+[2024-10-24 14:36:19] // MESSAGE // New message received from:  : 8
+[2024-10-24 14:36:19] // DISCONNECT // Server Disconnected:  : 8
+[2024-10-24 14:36:19] // CONNECT // Attempting new connection with documented server: A5_34 : 130.208.246.249 : 4034
+[2024-10-24 14:36:19] // CONNECT // New server connected on: 130.208.246.249 : 8
+[2024-10-24 14:36:19] // SENDING // HELO,A5_23
+[2024-10-24 14:36:19] // CONNECT // New connection established with: A5_34
+[2024-10-24 14:36:19] // MESSAGE // New message received from:  : 8
+[2024-10-24 14:36:19] // COMMAND // New command from Server:  : 8
+[2024-10-24 14:36:19] // COMMAND // HELO,A5_34
+[2024-10-24 14:36:19] // COMMAND // New command: HELO
+[2024-10-24 14:36:19] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // Group A5_34 has been tied to: 130.208.246.249
+[2024-10-24 14:36:19] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_34,130.208.246.249,4034;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:19] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // MESSAGE // New message received from: A5_34 : 8
+[2024-10-24 14:36:19] // COMMAND // New command from Server: A5_34 : 8
+[2024-10-24 14:36:19] // COMMAND // SERVERS,A5_34,130.208.246.249,4034;Instr_1,130.208.246.249,5001;A5_5,130.208.246.249,4005;A5_23,0.0.0.0,0;
+[2024-10-24 14:36:19] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:19] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_34 IP: 130.208.246.249 Port: 4034 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_23 IP: 0.0.0.0 Port: 0 documented.
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // MESSAGE // New message received from:  : 7
+[2024-10-24 14:36:19] // COMMAND // New command from Server:  : 7
+[2024-10-24 14:36:19] // COMMAND // HELO,A5_169
+[2024-10-24 14:36:19] // COMMAND // New command: HELO
+[2024-10-24 14:36:19] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // Group A5_169 has been tied to: 130.208.246.249
+[2024-10-24 14:36:19] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_34,130.208.246.249,4034;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:19] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:36:19] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:36:19] // COMMAND // SERVERS,A5_169,130.208.246.249,4169;A5_5,130.208.246.249,4005;A5_3,130.208.246.249,4003;Instr_1,130.208.246.249,5001;SERVERS,A5_169,130.208.246.249,4169;A5_5,130.208.246.249,4005;A5_3,130.208.246.249,4003;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:19] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:19] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_3 IP: 130.208.246.249 Port: 4003 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:36:19] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:19] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: A5_3 IP: 130.208.246.249 Port: 4003 documented.
+[2024-10-24 14:36:19] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:19] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:36:19] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:36:19] // COMMAND // STATUSREQ
+[2024-10-24 14:36:19] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:36:19] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:36:19] // SENDING // STATUSRESP
+[2024-10-24 14:36:19] // COMMAND // Successfully sent STATUSRESP to server: A5_169 : 7
+[2024-10-24 14:36:19] // COMMAND // Finished commands list.
+[2024-10-24 14:36:20] // MESSAGE // New message received from: CLIENT : 4
+[2024-10-24 14:36:20] // CLIENT // Client Disconnected: 4
+[2024-10-24 14:36:20] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:36:20] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:36:20] // COMMAND // SERVERS,A5_100,130.208.246.249,4025;Instr_1130.208.246.249A5_5130.208.246.249A5_23,130.208.246.249,-1;
+[2024-10-24 14:36:20] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:20] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:20] // COMMAND // New server: A5_100 IP: 130.208.246.249 Port: 4025 documented.
+[2024-10-24 14:36:20] // COMMAND // Finished commands list.
+[2024-10-24 14:36:33] // CONNECT // New connection trying to be made.
+[2024-10-24 14:36:33] // CONNECT // New connection made: 4
+[2024-10-24 14:36:33] // SENDING // HELO,A5_23
+[2024-10-24 14:36:33] // MESSAGE // New message received from:  : 4
+[2024-10-24 14:36:33] // COMMAND // New command from Server:  : 4
+[2024-10-24 14:36:33] // COMMAND // HELO,A5_53
+[2024-10-24 14:36:33] // COMMAND // New command: HELO
+[2024-10-24 14:36:33] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:36:33] // COMMAND // Group A5_53 has been tied to: 130.208.246.249
+[2024-10-24 14:36:33] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_34,130.208.246.249,4034;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:36:33] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:36:33] // COMMAND // Finished commands list.
+[2024-10-24 14:36:33] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:36:33] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:36:33] // COMMAND // SERVERS,A5_53,130.208.246.249,4153;A5_23,130.208.246.249,4123;
+[2024-10-24 14:36:33] // COMMAND // New command: SERVERS
+[2024-10-24 14:36:33] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:36:33] // COMMAND // New server: A5_53 IP: 130.208.246.249 Port: 4153 documented.
+[2024-10-24 14:36:33] // COMMAND // New server: A5_23 IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:36:33] // COMMAND // Finished commands list.
+[2024-10-24 14:36:38] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:36:38] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:36:38] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:36:38] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:36:38] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:36:38] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:36:38] // COMMAND // Finished commands list.
+[2024-10-24 14:36:44] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:36:44] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:36:44] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:36:44] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:36:44] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:36:44] // COMMAND // KEEPALIVE from A5_100 : 6 is empty. 
+[2024-10-24 14:36:44] // COMMAND // Finished commands list.
+[2024-10-24 14:36:51] // MESSAGE // Sending status packets.
+[2024-10-24 14:36:51] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:36:51] // SENDING // KEEPALIVE,0
+[2024-10-24 14:36:51] // MESSAGE // Sending KEEPALIVE to: A5_100 : 6
+[2024-10-24 14:36:51] // SENDING // KEEPALIVE,0
+[2024-10-24 14:36:51] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:36:51] // SENDING // KEEPALIVE,0
+[2024-10-24 14:36:51] // MESSAGE // Sending KEEPALIVE to: A5_34 : 8
+[2024-10-24 14:36:51] // SENDING // KEEPALIVE,0
+[2024-10-24 14:36:51] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:36:51] // SENDING // KEEPALIVE,0
+[2024-10-24 14:36:51] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:36:51] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:36:51] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:36:51] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:36:51] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:36:51] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:36:51] // COMMAND // Finished commands list.
+[2024-10-24 14:37:00] // CONNECT // New connection trying to be made.
+[2024-10-24 14:37:00] // CONNECT // New connection made: 9
+[2024-10-24 14:37:00] // SENDING // HELO,A5_23
+[2024-10-24 14:37:02] // MESSAGE // New message received from:  : 9
+[2024-10-24 14:37:02] // COMMAND // New command from Server:  : 9
+[2024-10-24 14:37:02] // CLIENT // Detected CLIENT password.
+[2024-10-24 14:37:02] // COMMAND // CLIENT has been tied to: 130.208.240.15
+[2024-10-24 14:37:02] // CLIENT // New client recognized: 9
+[2024-10-24 14:37:02] // SENDING // Welcome [CLIENT], how can I help you today?
+[2024-10-24 14:37:04] // MESSAGE // New message received from: CLIENT : 9
+[2024-10-24 14:37:04] // CLIENT // New command from Client: 9
+[2024-10-24 14:37:04] // CLIENT // Attempting to list of servers to client
+[2024-10-24 14:37:04] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_34,130.208.246.249,4034;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:37:04] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:37:15] // MESSAGE // New message received from: CLIENT : 9
+[2024-10-24 14:37:15] // CLIENT // Client Disconnected: 9
+[2024-10-24 14:37:19] // MESSAGE // New message received from: A5_34 : 8
+[2024-10-24 14:37:19] // COMMAND // New command from Server: A5_34 : 8
+[2024-10-24 14:37:19] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:37:19] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:37:19] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:37:19] // COMMAND // KEEPALIVE from A5_34 : 8 is empty. 
+[2024-10-24 14:37:19] // COMMAND // Finished commands list.
+[2024-10-24 14:37:44] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:37:44] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:37:44] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:37:44] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:37:44] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:37:44] // COMMAND // KEEPALIVE from A5_100 : 6 is empty. 
+[2024-10-24 14:37:44] // COMMAND // Finished commands list.
+[2024-10-24 14:37:48] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:37:48] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:37:48] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:37:48] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:37:48] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:37:48] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:37:48] // COMMAND // Finished commands list.
+[2024-10-24 14:37:52] // MESSAGE // Sending status packets.
+[2024-10-24 14:37:52] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:37:52] // SENDING // KEEPALIVE,0
+[2024-10-24 14:37:52] // MESSAGE // Sending KEEPALIVE to: A5_100 : 6
+[2024-10-24 14:37:52] // SENDING // KEEPALIVE,0
+[2024-10-24 14:37:52] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:37:52] // SENDING // KEEPALIVE,0
+[2024-10-24 14:37:52] // MESSAGE // Sending KEEPALIVE to: A5_34 : 8
+[2024-10-24 14:37:52] // SENDING // KEEPALIVE,0
+[2024-10-24 14:37:52] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:37:52] // SENDING // KEEPALIVE,0
+[2024-10-24 14:37:52] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:37:52] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:37:52] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:37:52] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:37:52] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:37:52] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:37:52] // COMMAND // Finished commands list.
+[2024-10-24 14:38:19] // MESSAGE // New message received from: A5_34 : 8
+[2024-10-24 14:38:19] // COMMAND // New command from Server: A5_34 : 8
+[2024-10-24 14:38:19] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:38:19] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:38:19] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:38:19] // COMMAND // KEEPALIVE from A5_34 : 8 is empty. 
+[2024-10-24 14:38:19] // COMMAND // Finished commands list.
+[2024-10-24 14:38:44] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:38:44] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:38:44] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:38:44] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:38:44] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:38:44] // COMMAND // KEEPALIVE from A5_100 : 6 is empty. 
+[2024-10-24 14:38:44] // COMMAND // Finished commands list.
+[2024-10-24 14:38:52] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:38:52] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:38:52] // COMMAND // STATUSREQ
+[2024-10-24 14:38:52] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:38:52] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:38:52] // SENDING // STATUSRESP
+[2024-10-24 14:38:52] // COMMAND // Successfully sent STATUSRESP to server: A5_169 : 7
+[2024-10-24 14:38:52] // COMMAND // Finished commands list.
+[2024-10-24 14:38:52] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:38:52] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:38:52] // COMMAND // HELO,A5_169
+[2024-10-24 14:38:52] // COMMAND // New command: HELO
+[2024-10-24 14:38:52] // COMMAND // HELO detected. Server already has said HELO. Sending SERVERS.
+[2024-10-24 14:38:52] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_34,130.208.246.249,4034;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:38:52] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:38:52] // COMMAND // Finished commands list.
+[2024-10-24 14:38:53] // MESSAGE // Sending status packets.
+[2024-10-24 14:38:53] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:38:53] // SENDING // KEEPALIVE,0
+[2024-10-24 14:38:53] // MESSAGE // Sending KEEPALIVE to: A5_100 : 6
+[2024-10-24 14:38:53] // SENDING // KEEPALIVE,0
+[2024-10-24 14:38:53] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:38:53] // SENDING // KEEPALIVE,0
+[2024-10-24 14:38:53] // MESSAGE // Sending KEEPALIVE to: A5_34 : 8
+[2024-10-24 14:38:53] // SENDING // KEEPALIVE,0
+[2024-10-24 14:38:53] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:38:53] // SENDING // KEEPALIVE,0
+[2024-10-24 14:38:53] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:38:53] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:38:53] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:38:53] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:38:53] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:38:53] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:38:53] // COMMAND // Finished commands list.
+[2024-10-24 14:38:58] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:38:58] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:38:58] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:38:58] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:38:58] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:38:58] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:38:58] // COMMAND // Finished commands list.
+[2024-10-24 14:39:06] // CONNECT // New connection trying to be made.
+[2024-10-24 14:39:06] // CONNECT // New connection made: 9
+[2024-10-24 14:39:06] // SENDING // HELO,A5_23
+[2024-10-24 14:39:06] // MESSAGE // New message received from:  : 9
+[2024-10-24 14:39:06] // COMMAND // New command from Server:  : 9
+[2024-10-24 14:39:06] // COMMAND // HELO,A5_5
+[2024-10-24 14:39:06] // COMMAND // New command: HELO
+[2024-10-24 14:39:06] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:39:06] // COMMAND // Group A5_5 has been tied to: 130.208.246.249
+[2024-10-24 14:39:06] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_34,130.208.246.249,4034;A5_5,130.208.246.249,57610;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:39:06] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:39:06] // COMMAND // Finished commands list.
+[2024-10-24 14:39:06] // MESSAGE // New message received from: A5_5 : 9
+[2024-10-24 14:39:06] // COMMAND // New command from Server: A5_5 : 9
+[2024-10-24 14:39:06] // COMMAND // SERVERS,A5_5,130.208.246.249,4005;A5_23,130.208.246.249,4123;A5_53,130.208.246.249,4153;A5_100,130.208.246.249,-1;A5_34,130.208.246.249,4034;A5_74,130.208.246.249,4074;A5_169,130.208.246.249,4169;A5_3,130.208.246.249,4003;A5_69,130.208.246.249,4069;A5_30,130.208.246.249,4031;Instr_1,130.208.246.249,5001;Instr_3,130.208.246.249,5003;Instr_2,130.208.246.249,5002;
+[2024-10-24 14:39:06] // COMMAND // New command: SERVERS
+[2024-10-24 14:39:06] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_23 IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_53 IP: 130.208.246.249 Port: 4153 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_34 IP: 130.208.246.249 Port: 4034 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_74 IP: 130.208.246.249 Port: 4074 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_3 IP: 130.208.246.249 Port: 4003 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_69 IP: 130.208.246.249 Port: 4069 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: A5_30 IP: 130.208.246.249 Port: 4031 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: Instr_3 IP: 130.208.246.249 Port: 5003 documented.
+[2024-10-24 14:39:06] // COMMAND // New server: Instr_2 IP: 130.208.246.249 Port: 5002 documented.
+[2024-10-24 14:39:06] // COMMAND // Finished commands list.
+[2024-10-24 14:39:19] // MESSAGE // New message received from: A5_34 : 8
+[2024-10-24 14:39:19] // COMMAND // New command from Server: A5_34 : 8
+[2024-10-24 14:39:19] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:39:19] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:39:19] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:39:19] // COMMAND // KEEPALIVE from A5_34 : 8 is empty. 
+[2024-10-24 14:39:19] // COMMAND // Finished commands list.
+[2024-10-24 14:39:23] // CONNECT // New connection trying to be made.
+[2024-10-24 14:39:23] // CONNECT // New connection made: 10
+[2024-10-24 14:39:23] // SENDING // HELO,A5_23
+[2024-10-24 14:39:23] // MESSAGE // New message received from:  : 10
+[2024-10-24 14:39:23] // COMMAND // New command from Server:  : 10
+[2024-10-24 14:39:23] // COMMAND // A5_
+[2024-10-24 14:39:23] // SENDING //  ERROR,UNKOWN_COMMAND
+[2024-10-24 14:39:24] // MESSAGE // New message received from: A5_34 : 8
+[2024-10-24 14:39:24] // DISCONNECT // Server Disconnected: A5_34 : 8
+[2024-10-24 14:39:25] // MESSAGE // New message received from: A5_5 : 9
+[2024-10-24 14:39:25] // DISCONNECT // Server Disconnected: A5_5 : 9
+[2024-10-24 14:39:34] // CONNECT // New connection trying to be made.
+[2024-10-24 14:39:34] // CONNECT // New connection made: 8
+[2024-10-24 14:39:34] // SENDING // HELO,A5_23
+[2024-10-24 14:39:34] // MESSAGE // New message received from:  : 8
+[2024-10-24 14:39:34] // COMMAND // New command from Server:  : 8
+[2024-10-24 14:39:34] // COMMAND // HELO,VictimSERVERS,Victim,130.208.246.249,4123;Victim,127.0.0.1,4123;
+[2024-10-24 14:39:34] // COMMAND // New command: HELO
+[2024-10-24 14:39:34] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:39:34] // COMMAND // Group Victim has been tied to: 130.208.240.12
+[2024-10-24 14:39:34] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,32970;
+[2024-10-24 14:39:34] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:39:34] // COMMAND // New command: SERVERS
+[2024-10-24 14:39:34] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:39:34] // COMMAND // New server: Victim IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:39:34] // COMMAND // New server: Victim IP: 127.0.0.1 Port: 4123 documented.
+[2024-10-24 14:39:34] // COMMAND // Finished commands list.
+[2024-10-24 14:39:44] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:39:44] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:39:44] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:39:44] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:39:44] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:39:44] // COMMAND // KEEPALIVE from A5_100 : 6 is empty. 
+[2024-10-24 14:39:44] // COMMAND // Finished commands list.
+[2024-10-24 14:39:54] // MESSAGE // Sending status packets.
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to: A5_100 : 6
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to:  : 10
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // Sending KEEPALIVE to: Victim : 8
+[2024-10-24 14:39:54] // SENDING // KEEPALIVE,0
+[2024-10-24 14:39:54] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:39:54] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:39:54] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:39:54] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:39:54] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:39:54] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:39:54] // COMMAND // Finished commands list.
+[2024-10-24 14:40:08] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:40:08] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:40:08] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:40:08] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:40:08] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:40:08] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:40:08] // COMMAND // Finished commands list.
+[2024-10-24 14:40:35] // MESSAGE // New message received from: Victim : 8
+[2024-10-24 14:40:35] // DISCONNECT // Server Disconnected: Victim : 8
+[2024-10-24 14:40:35] // MESSAGE // New message received from:  : 10
+[2024-10-24 14:40:35] // DISCONNECT // Server Disconnected:  : 10
+[2024-10-24 14:40:44] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:40:44] // COMMAND // New command from Server: A5_100 : 6
+[2024-10-24 14:40:44] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:40:44] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:40:44] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:40:44] // COMMAND // KEEPALIVE from A5_100 : 6 is empty. 
+[2024-10-24 14:40:44] // COMMAND // Finished commands list.
+[2024-10-24 14:40:50] // CONNECT // New connection trying to be made.
+[2024-10-24 14:40:50] // CONNECT // New connection made: 8
+[2024-10-24 14:40:50] // SENDING // HELO,A5_23
+[2024-10-24 14:40:50] // MESSAGE // New message received from:  : 8
+[2024-10-24 14:40:50] // COMMAND // New command from Server:  : 8
+[2024-10-24 14:40:50] // COMMAND // HELO,A5_5
+[2024-10-24 14:40:50] // COMMAND // New command: HELO
+[2024-10-24 14:40:50] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:40:50] // COMMAND // Group A5_5 has been tied to: 130.208.246.249
+[2024-10-24 14:40:50] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_5,130.208.246.249,60988;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:40:50] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:40:50] // COMMAND // Finished commands list.
+[2024-10-24 14:40:50] // MESSAGE // New message received from: A5_5 : 8
+[2024-10-24 14:40:50] // COMMAND // New command from Server: A5_5 : 8
+[2024-10-24 14:40:50] // COMMAND // SERVERS,A5_5,130.208.246.249,4005;A5_23,130.208.246.249,4123;A5_53,130.208.246.249,4153;A5_69,130.208.246.249,4069;A5_169,130.208.246.249,4169;A5_100,130.208.246.249,4025;Instr_1,130.208.246.249,5001;Instr_3,130.208.246.249,5003;Instr_2,130.208.246.249,5002;
+[2024-10-24 14:40:50] // COMMAND // New command: SERVERS
+[2024-10-24 14:40:50] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_23 IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_53 IP: 130.208.246.249 Port: 4153 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_69 IP: 130.208.246.249 Port: 4069 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: A5_100 IP: 130.208.246.249 Port: 4025 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: Instr_3 IP: 130.208.246.249 Port: 5003 documented.
+[2024-10-24 14:40:50] // COMMAND // New server: Instr_2 IP: 130.208.246.249 Port: 5002 documented.
+[2024-10-24 14:40:50] // COMMAND // Finished commands list.
+[2024-10-24 14:40:54] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:40:54] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:40:54] // COMMAND // STATUSREQ
+[2024-10-24 14:40:54] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:40:54] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:40:54] // SENDING // STATUSRESP
+[2024-10-24 14:40:54] // COMMAND // Successfully sent STATUSRESP to server: A5_169 : 7
+[2024-10-24 14:40:54] // COMMAND // Finished commands list.
+[2024-10-24 14:40:54] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:40:54] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:40:54] // COMMAND // HELO,A5_169
+[2024-10-24 14:40:54] // COMMAND // New command: HELO
+[2024-10-24 14:40:54] // COMMAND // HELO detected. Server already has said HELO. Sending SERVERS.
+[2024-10-24 14:40:54] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;A5_5,130.208.246.249,60988;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:40:54] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:40:54] // COMMAND // Finished commands list.
+[2024-10-24 14:40:55] // MESSAGE // Sending status packets.
+[2024-10-24 14:40:55] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:40:55] // SENDING // KEEPALIVE,0
+[2024-10-24 14:40:55] // MESSAGE // Sending KEEPALIVE to: A5_100 : 6
+[2024-10-24 14:40:55] // SENDING // KEEPALIVE,0
+[2024-10-24 14:40:55] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:40:55] // SENDING // KEEPALIVE,0
+[2024-10-24 14:40:55] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:40:55] // SENDING // KEEPALIVE,0
+[2024-10-24 14:40:55] // MESSAGE // Sending KEEPALIVE to: A5_5 : 8
+[2024-10-24 14:40:55] // SENDING // KEEPALIVE,0
+[2024-10-24 14:40:55] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:40:55] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:40:55] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:40:55] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:40:55] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:40:55] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:40:55] // COMMAND // Finished commands list.
+[2024-10-24 14:41:18] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:41:18] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:41:18] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:41:18] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:41:18] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:41:18] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:41:18] // COMMAND // Finished commands list.
+[2024-10-24 14:41:37] // MESSAGE // New message received from: A5_100 : 6
+[2024-10-24 14:41:37] // DISCONNECT // Server Disconnected: A5_100 : 6
+[2024-10-24 14:41:41] // CONNECT // New connection trying to be made.
+[2024-10-24 14:41:41] // CONNECT // New connection made: 6
+[2024-10-24 14:41:41] // SENDING // HELO,A5_23
+[2024-10-24 14:41:43] // MESSAGE // New message received from: A5_5 : 8
+[2024-10-24 14:41:43] // COMMAND // New command from Server: A5_5 : 8
+[2024-10-24 14:41:43] // COMMAND // STATUSREQ
+[2024-10-24 14:41:43] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:41:43] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:41:43] // SENDING // STATUSRESP
+[2024-10-24 14:41:43] // COMMAND // Successfully sent STATUSRESP to server: A5_5 : 8
+[2024-10-24 14:41:43] // COMMAND // Finished commands list.
+[2024-10-24 14:41:44] // MESSAGE // New message received from:  : 6
+[2024-10-24 14:41:44] // COMMAND // New command from Server:  : 6
+[2024-10-24 14:41:44] // CLIENT // Detected CLIENT password.
+[2024-10-24 14:41:44] // COMMAND // CLIENT has been tied to: 130.208.240.15
+[2024-10-24 14:41:44] // CLIENT // New client recognized: 6
+[2024-10-24 14:41:44] // SENDING // Welcome [CLIENT], how can I help you today?
+[2024-10-24 14:41:47] // MESSAGE // New message received from: CLIENT : 6
+[2024-10-24 14:41:47] // CLIENT // New command from Client: 6
+[2024-10-24 14:41:47] // CLIENT // Attempting to list of servers to client
+[2024-10-24 14:41:47] // SENDING // SERVERS,A5_169,130.208.246.249,4169;A5_5,130.208.246.249,60988;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:41:47] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:41:47] // CONNECT // New connection trying to be made.
+[2024-10-24 14:41:47] // CONNECT // New connection made: 9
+[2024-10-24 14:41:47] // SENDING // HELO,A5_23
+[2024-10-24 14:41:47] // MESSAGE // New message received from:  : 9
+[2024-10-24 14:41:47] // COMMAND // New command from Server:  : 9
+[2024-10-24 14:41:47] // COMMAND // HELO,VictimSERVERS,Victim,130.208.246.249,4123;Victim,127.0.0.1,4123;
+[2024-10-24 14:41:47] // COMMAND // New command: HELO
+[2024-10-24 14:41:47] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:41:47] // COMMAND // Group Victim has been tied to: 130.208.240.12
+[2024-10-24 14:41:47] // SENDING // SERVERS,A5_169,130.208.246.249,4169;A5_5,130.208.246.249,60988;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,38952;
+[2024-10-24 14:41:47] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:41:47] // COMMAND // New command: SERVERS
+[2024-10-24 14:41:47] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:41:47] // COMMAND // New server: Victim IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:41:47] // COMMAND // New server: Victim IP: 127.0.0.1 Port: 4123 documented.
+[2024-10-24 14:41:47] // COMMAND // Finished commands list.
+[2024-10-24 14:41:56] // MESSAGE // Sending status packets.
+[2024-10-24 14:41:56] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:41:56] // SENDING // KEEPALIVE,0
+[2024-10-24 14:41:56] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:41:56] // SENDING // KEEPALIVE,0
+[2024-10-24 14:41:56] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:41:56] // SENDING // KEEPALIVE,0
+[2024-10-24 14:41:56] // MESSAGE // Sending KEEPALIVE to: A5_5 : 8
+[2024-10-24 14:41:56] // SENDING // KEEPALIVE,0
+[2024-10-24 14:41:56] // MESSAGE // Sending KEEPALIVE to: Victim : 9
+[2024-10-24 14:41:56] // SENDING // KEEPALIVE,0
+[2024-10-24 14:41:56] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:41:56] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:41:56] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:41:56] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:41:56] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:41:56] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:41:56] // COMMAND // Finished commands list.
+[2024-10-24 14:42:00] // CONNECT // New connection trying to be made.
+[2024-10-24 14:42:00] // CONNECT // New connection made: 10
+[2024-10-24 14:42:00] // SENDING // HELO,A5_23
+[2024-10-24 14:42:00] // MESSAGE // New message received from:  : 10
+[2024-10-24 14:42:00] // COMMAND // New command from Server:  : 10
+[2024-10-24 14:42:00] // COMMAND // A5_
+[2024-10-24 14:42:00] // SENDING //  ERROR,UNKOWN_COMMAND
+[2024-10-24 14:42:01] // MESSAGE // New message received from: A5_5 : 8
+[2024-10-24 14:42:01] // DISCONNECT // Server Disconnected: A5_5 : 8
+[2024-10-24 14:42:05] // MESSAGE // New message received from: CLIENT : 6
+[2024-10-24 14:42:05] // CLIENT // New command from Client: 6
+[2024-10-24 14:42:05] // CLIENT // Client is asking for entirety of documented servers.
+[2024-10-24 14:42:05] // SENDING // SERVERS,A5_169, 130.208.246.249, 4169;A5_23, 130.208.246.249, 4123;A5_3, 130.208.246.249, 4003;A5_30, 130.208.246.249, 4031;A5_53, 130.208.246.249, 4153;A5_69, 130.208.246.249, 4069;A5_74, 130.208.246.249, 4074;Instr_1, 130.208.246.249, 5001;Instr_2, 130.208.246.249, 5002;Instr_3, 130.208.246.249, 5003;NUMBER, 130.208.246.249, 5005;Victim, 127.0.0.1, 4123;
+[2024-10-24 14:42:05] // COMMAND // Succeeded in sending list of documented servers.
+[2024-10-24 14:42:28] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:42:28] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:42:28] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:42:28] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:42:28] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:42:28] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:42:28] // COMMAND // Finished commands list.
+[2024-10-24 14:42:56] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:42:56] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:42:56] // COMMAND // STATUSREQ
+[2024-10-24 14:42:56] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:42:56] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:42:56] // SENDING // STATUSRESP
+[2024-10-24 14:42:56] // COMMAND // Successfully sent STATUSRESP to server: A5_169 : 7
+[2024-10-24 14:42:56] // COMMAND // Finished commands list.
+[2024-10-24 14:42:56] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:42:56] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:42:56] // COMMAND // HELO,A5_169
+[2024-10-24 14:42:56] // COMMAND // New command: HELO
+[2024-10-24 14:42:56] // COMMAND // HELO detected. Server already has said HELO. Sending SERVERS.
+[2024-10-24 14:42:56] // SENDING // SERVERS,A5_169,130.208.246.249,4169;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,38952;
+[2024-10-24 14:42:56] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:42:56] // COMMAND // Finished commands list.
+[2024-10-24 14:42:57] // MESSAGE // Sending status packets.
+[2024-10-24 14:42:57] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:42:57] // SENDING // KEEPALIVE,0
+[2024-10-24 14:42:57] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:42:57] // SENDING // KEEPALIVE,0
+[2024-10-24 14:42:57] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:42:57] // SENDING // KEEPALIVE,0
+[2024-10-24 14:42:57] // MESSAGE // Sending KEEPALIVE to: Victim : 9
+[2024-10-24 14:42:57] // SENDING // KEEPALIVE,0
+[2024-10-24 14:42:57] // MESSAGE // Sending KEEPALIVE to:  : 10
+[2024-10-24 14:42:57] // SENDING // KEEPALIVE,0
+[2024-10-24 14:42:57] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:42:57] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:42:57] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:42:57] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:42:57] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:42:57] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:42:57] // COMMAND // Finished commands list.
+[2024-10-24 14:43:38] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:43:38] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:43:38] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:43:38] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:43:38] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:43:38] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:43:38] // COMMAND // Finished commands list.
+[2024-10-24 14:43:58] // MESSAGE // Sending status packets.
+[2024-10-24 14:43:58] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:43:58] // SENDING // KEEPALIVE,0
+[2024-10-24 14:43:58] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:43:58] // SENDING // KEEPALIVE,0
+[2024-10-24 14:43:58] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:43:58] // SENDING // KEEPALIVE,0
+[2024-10-24 14:43:58] // MESSAGE // Sending KEEPALIVE to: Victim : 9
+[2024-10-24 14:43:58] // SENDING // KEEPALIVE,0
+[2024-10-24 14:43:58] // MESSAGE // Sending KEEPALIVE to:  : 10
+[2024-10-24 14:43:58] // SENDING // KEEPALIVE,0
+[2024-10-24 14:43:58] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:43:58] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:43:58] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:43:58] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:43:58] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:43:58] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:43:58] // COMMAND // Finished commands list.
+[2024-10-24 14:44:16] // CONNECT // New connection trying to be made.
+[2024-10-24 14:44:16] // CONNECT // New connection made: 8
+[2024-10-24 14:44:16] // SENDING // HELO,A5_23
+[2024-10-24 14:44:16] // MESSAGE // New message received from:  : 8
+[2024-10-24 14:44:16] // COMMAND // New command from Server:  : 8
+[2024-10-24 14:44:16] // COMMAND // HELO,A5_5
+[2024-10-24 14:44:16] // COMMAND // New command: HELO
+[2024-10-24 14:44:16] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:44:16] // COMMAND // Group A5_5 has been tied to: 130.208.246.249
+[2024-10-24 14:44:16] // SENDING // SERVERS,A5_169,130.208.246.249,4169;A5_5,130.208.246.249,32790;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,38952;
+[2024-10-24 14:44:16] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:44:16] // COMMAND // Finished commands list.
+[2024-10-24 14:44:16] // MESSAGE // New message received from: A5_5 : 8
+[2024-10-24 14:44:16] // COMMAND // New command from Server: A5_5 : 8
+[2024-10-24 14:44:16] // COMMAND // SERVERS,A5_5,130.208.246.249,4005;A5_23,130.208.246.249,4123;A5_53,130.208.246.249,4153;A5_69,130.208.246.249,4069;A5_169,130.208.246.249,4169;A5_100,130.208.246.249,4025;Instr_1,130.208.246.249,5001;Instr_3,130.208.246.249,5003;Instr_2,130.208.246.249,5002;
+[2024-10-24 14:44:16] // COMMAND // New command: SERVERS
+[2024-10-24 14:44:16] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_5 IP: 130.208.246.249 Port: 4005 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_23 IP: 130.208.246.249 Port: 4123 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_53 IP: 130.208.246.249 Port: 4153 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_69 IP: 130.208.246.249 Port: 4069 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_169 IP: 130.208.246.249 Port: 4169 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: A5_100 IP: 130.208.246.249 Port: 4025 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: Instr_1 IP: 130.208.246.249 Port: 5001 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: Instr_3 IP: 130.208.246.249 Port: 5003 documented.
+[2024-10-24 14:44:16] // COMMAND // New server: Instr_2 IP: 130.208.246.249 Port: 5002 documented.
+[2024-10-24 14:44:16] // COMMAND // Finished commands list.
+[2024-10-24 14:44:36] // MESSAGE // New message received from: A5_5 : 8
+[2024-10-24 14:44:36] // DISCONNECT // Server Disconnected: A5_5 : 8
+[2024-10-24 14:44:48] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:44:48] // COMMAND // New command from Server: A5_53 : 4
+[2024-10-24 14:44:48] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:44:48] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:44:48] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:44:48] // COMMAND // KEEPALIVE from A5_53 : 4 is empty. 
+[2024-10-24 14:44:48] // COMMAND // Finished commands list.
+[2024-10-24 14:44:58] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:44:58] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:44:58] // COMMAND // STATUSREQ
+[2024-10-24 14:44:58] // COMMAND // New command: STATUSREQ
+[2024-10-24 14:44:58] // COMMAND // STATUSREQ detected. Sending STATUSRESP.
+[2024-10-24 14:44:58] // SENDING // STATUSRESP
+[2024-10-24 14:44:58] // COMMAND // Successfully sent STATUSRESP to server: A5_169 : 7
+[2024-10-24 14:44:58] // COMMAND // Finished commands list.
+[2024-10-24 14:44:58] // MESSAGE // New message received from: A5_169 : 7
+[2024-10-24 14:44:58] // COMMAND // New command from Server: A5_169 : 7
+[2024-10-24 14:44:58] // COMMAND // HELO,A5_169
+[2024-10-24 14:44:58] // COMMAND // New command: HELO
+[2024-10-24 14:44:58] // COMMAND // HELO detected. Server already has said HELO. Sending SERVERS.
+[2024-10-24 14:44:58] // SENDING // SERVERS,A5_169,130.208.246.249,4169;A5_53,130.208.246.249,36190;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,38952;
+[2024-10-24 14:44:58] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:44:58] // COMMAND // Finished commands list.
+[2024-10-24 14:44:59] // MESSAGE // Sending status packets.
+[2024-10-24 14:44:59] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:44:59] // SENDING // KEEPALIVE,0
+[2024-10-24 14:44:59] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:44:59] // SENDING // KEEPALIVE,0
+[2024-10-24 14:44:59] // MESSAGE // Sending KEEPALIVE to: A5_53 : 4
+[2024-10-24 14:44:59] // SENDING // KEEPALIVE,0
+[2024-10-24 14:44:59] // MESSAGE // Sending KEEPALIVE to: Victim : 9
+[2024-10-24 14:44:59] // SENDING // KEEPALIVE,0
+[2024-10-24 14:44:59] // MESSAGE // Sending KEEPALIVE to:  : 10
+[2024-10-24 14:44:59] // SENDING // KEEPALIVE,0
+[2024-10-24 14:44:59] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:44:59] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:44:59] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:44:59] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:44:59] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:44:59] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:44:59] // COMMAND // Finished commands list.
+[2024-10-24 14:45:17] // MESSAGE // New message received from: A5_53 : 4
+[2024-10-24 14:45:17] // DISCONNECT // Server Disconnected: A5_53 : 4
+[2024-10-24 14:46:00] // MESSAGE // Sending status packets.
+[2024-10-24 14:46:00] // MESSAGE // Sending KEEPALIVE to: Instr_1 : 5
+[2024-10-24 14:46:00] // SENDING // KEEPALIVE,0
+[2024-10-24 14:46:00] // MESSAGE // Sending KEEPALIVE to: A5_169 : 7
+[2024-10-24 14:46:00] // SENDING // KEEPALIVE,0
+[2024-10-24 14:46:00] // MESSAGE // Sending KEEPALIVE to: Victim : 9
+[2024-10-24 14:46:00] // SENDING // KEEPALIVE,0
+[2024-10-24 14:46:00] // MESSAGE // Sending KEEPALIVE to:  : 10
+[2024-10-24 14:46:00] // SENDING // KEEPALIVE,0
+[2024-10-24 14:46:00] // MESSAGE // New message received from: Instr_1 : 5
+[2024-10-24 14:46:00] // COMMAND // New command from Server: Instr_1 : 5
+[2024-10-24 14:46:00] // COMMAND // KEEPALIVE,0
+[2024-10-24 14:46:00] // COMMAND // New command: KEEPALIVE
+[2024-10-24 14:46:00] // COMMAND // KEEPALIVE detected. Taking in data.
+[2024-10-24 14:46:00] // COMMAND // KEEPALIVE from Instr_1 : 5 is empty. 
+[2024-10-24 14:46:00] // COMMAND // Finished commands list.
+[2024-10-24 14:46:25] // MESSAGE // New message received from: CLIENT : 6
+[2024-10-24 14:46:25] // CLIENT // New command from Client: 6
+[2024-10-24 14:46:25] // CLIENT // Attempting to list of servers to client
+[2024-10-24 14:46:25] // SENDING // SERVERS,A5_169,130.208.246.249,4169;Instr_1,130.208.246.249,5001;Victim,130.208.240.12,38952;
+[2024-10-24 14:46:25] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:46:48] // DISCONNECT // Found a server who has been silent for too long: Victim : 9
+[2024-10-24 14:46:48] // CONNECT // Attempting new connection with documented server: A5_100 : 130.208.246.249 : 4025
+[2024-10-24 14:46:48] // CONNECT // New server connected on: 130.208.246.249 : 4
+[2024-10-24 14:46:48] // SENDING // HELO,A5_23
+[2024-10-24 14:46:48] // CONNECT // New connection established with: A5_100
+[2024-10-24 14:46:48] // MESSAGE // New message received from:  : 4
+[2024-10-24 14:46:48] // COMMAND // New command from Server:  : 4
+[2024-10-24 14:46:48] // COMMAND // HELO,A5_100
+[2024-10-24 14:46:48] // COMMAND // New command: HELO
+[2024-10-24 14:46:48] // COMMAND // HELO detected. Taking in data.
+[2024-10-24 14:46:48] // COMMAND // Group A5_100 has been tied to: 130.208.246.249
+[2024-10-24 14:46:48] // SENDING // SERVERS,A5_100,130.208.246.249,4025;A5_169,130.208.246.249,4169;Instr_1,130.208.246.249,5001;
+[2024-10-24 14:46:48] // COMMAND // Succeeded in sending list of servers
+[2024-10-24 14:46:48] // COMMAND // Finished commands list.
+[2024-10-24 14:46:49] // MESSAGE // New message received from: A5_100 : 4
+[2024-10-24 14:46:49] // COMMAND // New command from Server: A5_100 : 4
+[2024-10-24 14:46:49] // COMMAND // SERVERS,A5_100,130.208.246.249,4025;Instr_1130.208.246.249Victim130.208.246.249A5_5130.208.246.249A5_23,130.208.246.249,-1;
+[2024-10-24 14:46:49] // COMMAND // New command: SERVERS
+[2024-10-24 14:46:49] // COMMAND // SERVERS detected. Taking in data.
+[2024-10-24 14:46:49] // COMMAND // New server: A5_100 IP: 130.208.246.249 Port: 4025 documented.
+[2024-10-24 14:46:49] // COMMAND // Finished commands list.
+[2024-10-24 14:46:51] // MESSAGE // New message received from: A5_100 : 4
+[2024-10-24 14:46:51] // DISCONNECT // Server Disconnected: A5_100 : 4

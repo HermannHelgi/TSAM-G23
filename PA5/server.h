@@ -45,7 +45,7 @@ using namespace std;
 class Server
 {
 public:
-    Server(int portnumber, string password);
+    Server(int portnumber);
     ~Server();
 
     // Main Server functions
@@ -133,9 +133,10 @@ public:
     map<string, int> group_name_to_fd;              // Map to translate group name to File descriptor
 
     // Name variables and presets.
+    string server_ip;
     string group_name = "A5_23";
     string client_name = "CLIENT";
-    string client_password; 
+    string client_password = "ASSDESTOYER"; 
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";
 

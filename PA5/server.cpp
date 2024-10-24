@@ -1,9 +1,8 @@
 #include "server.h"
 
-Server::Server(int portnumber, string password) 
+Server::Server(int portnumber) 
 {
     portnum = portnumber;
-    client_password = password;
 }
 
 Server::~Server() {}
@@ -88,7 +87,7 @@ void Server::CheckForMoreConnections()
                 it++;
                 continue;
             }
-            else if (it->first != group_name)
+            else if (it->first != group_name && it->second.second != portnum)
             {
                 // CAN CONNECT
                 string server_ip = it->second.first;

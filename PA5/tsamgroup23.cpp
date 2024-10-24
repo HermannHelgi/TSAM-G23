@@ -2,18 +2,17 @@
 
 int main(int argc, char* argv[])
 {
-    if(argc != 3)
+    if(argc != 2)
     {
-        printf("Usage: chat_server <port> <password for client connection>\n");
+        printf("Usage: chat_server <port>\n");
         exit(0);
     }
 
     int port = atoi(argv[1]);
-    string password = argv[2];
     freopen("ErrorLog.txt", "a", stderr);
     freopen("Log.txt", "a", stdout);
 
-    Server main_server(port, password);
+    Server main_server(port);
     main_server.InitializeServer();
 
     bool finished = false;
