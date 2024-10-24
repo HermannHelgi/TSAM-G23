@@ -645,12 +645,15 @@ int Server::SendHELO(int fd)
 
 int Server::RespondSTATUSRESP(int fd, vector<string> variables)
 {
-    for (int i = 0; i < variables.size(); i++)
+    for (int i = 0; (i+1) < variables.size(); i++)
     {
-        if (variables[i] == group_name)
+        if (!variables[i+1].empty() && all_of(variables[i+1].begin(), variables[i+1].end(), ::isdigit))
         {
-            Log(string("// COMMAND // STATUSRESP has our messages. Calling GETMSGS."));
-            return SendGETMSGS(fd);
+            if (variables[i] == group_name && stoi(variables[i+1]) > 0)
+            {
+                Log(string("// COMMAND // STATUSRESP has our messages. Calling GETMSGS."));
+                return SendGETMSGS(fd);
+            }
         }
     }
     return 1;
