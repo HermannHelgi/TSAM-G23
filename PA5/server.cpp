@@ -870,12 +870,12 @@ int Server::RespondKEEPALIVE(int fd, vector<string> variables)
     {
         if (stoi(variables[0]) > 0)
         {
-            Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " has messages. Collecting. ");
+            Log("// COMMAND // KEEPALIVE from " + fd_to_group_name[fd] + " : " + to_string(fd) + " has messages. Collecting. ");
             return SendGETMSGS(fd);
         }
         else
         {
-            Log("// COMMAND // KEEPALIVE from " + to_string(fd) + " is empty. ");
+            Log("// COMMAND // KEEPALIVE from " + fd_to_group_name[fd] + " : " + to_string(fd) + " is empty. ");
             return 0;
         }
     }
