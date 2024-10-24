@@ -450,8 +450,6 @@ int Server::ReceiveServerCommand(int message_length, int fd)
     vector<vector<string>> full_variables_vector(max_variables);
     StripServerMessage(message_length, commands, full_variables_vector);
     
-    cout << commands[0]<< endl;
-
     if (commands[0] == client_password)
     {
         Log("// CLIENT // Detected CLIENT password.");
