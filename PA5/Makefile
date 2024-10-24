@@ -13,4 +13,4 @@ serversim: serversim.cpp
 	g++ -std=c++11 serversim.cpp -o $@
 
 clean:
-	rm -f client tsamgroup23 server serversim
+	rm -f client tsamgroup23 server serversim Log.txt ErrorLog.txt

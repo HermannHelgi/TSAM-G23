@@ -34,7 +34,7 @@ void Server::CheckTimeouts()
 
     while (it != socket_timers.end())
     {
-        if (difftime(now, it->second) > expiration_of_servers && fd_to_group_name[it->first] != client_name)
+        if (difftime(now, it->second) > expiration_of_servers && it->first != clientSock && it->first != listenSock)
         {
             Log(string("// DISCONNECT // Found a server who has been silent for too long: " + fd_to_group_name[it->first] + " : " + to_string(it->first)));
 
@@ -173,11 +173,11 @@ bool Server::ConnectToServer(string ip, int port)
         }
     }
 
-    Log(string("// CONNECT // New server connected on: ") + ip);
     connected_servers++;
     struct pollfd new_pollfd = {outboundSocket, POLLIN, 0};
     file_descriptors.push_back(new_pollfd);
     helo_received[new_pollfd.fd] = -1;
+    Log(string("// CONNECT // New server connected on: ") + ip + " : " + to_string(new_pollfd.fd));
     SendHELO(new_pollfd.fd);
     return true;
 }
@@ -229,12 +229,12 @@ int Server::CheckMessages()
                         }
 
                         // New connection made
-                        socket_timers[file_descriptors[i].fd] = time(NULL);
                         connected_servers++;
                         struct pollfd new_pollfd = {new_socket, POLLIN, 0};
                         file_descriptors.push_back(new_pollfd);
                         Log(string("// CONNECT // New connection made: " + to_string(new_pollfd.fd)));
                         helo_received[new_pollfd.fd] = -1;
+                        socket_timers[new_pollfd.fd] = time(NULL);
                         SendHELO(new_pollfd.fd);
                     }
                     else
