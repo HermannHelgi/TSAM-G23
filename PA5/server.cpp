@@ -1351,7 +1351,7 @@ int Server::RespondCONNECTSERVER(vector<string> variables)
 
 int Server::RespondDOCSERVERS()
 {
-    string send_buffer = "SERVERS,";
+    string send_buffer = "SERVERS: \n";
     size_t pos = 0;
     string group_info;
 
@@ -1361,7 +1361,7 @@ int Server::RespondDOCSERVERS()
         {
             continue;
         }
-        group_info = group_server.first +", "+ group_server.second.first +", "+ to_string(group_server.second.second)+";";
+        group_info = group_server.first +", "+ group_server.second.first +", "+ to_string(group_server.second.second)+";\n";
         send_buffer += group_info;
     }
 
