@@ -56,6 +56,7 @@ public:
     void CheckForMoreConnections();
 
     // Helper Functions
+    void CloseConnection(int fd, int i);
     bool ConnectToServer(string ip, int port);
     void ClearBuffer();
     void Log(string message);
@@ -132,6 +133,7 @@ public:
     map<int, int> helo_received;                    // Map of whether a new bot has sent a HELO message or not. -1 == no, 1 == yes.
     map<int, string> fd_to_group_name;              // Map to translate File descriptor to the group name
     map<string, int> group_name_to_fd;              // Map to translate group name to File descriptor
+    map<int, int> strike_counter;                   // Map of strike counts. From FD to amount of strikes.
 
     // Name variables and presets.
     string ip_address = "130.208.246.249";
@@ -140,7 +142,7 @@ public:
     string client_name = "CLIENT";
     string client_password = "ASSDESTROYER"; 
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
-    string errorMessage = "\x01 ERROR,UNKOWN_COMMAND\x04";
+    string errorMessage = "\x01" "ERROR,UNKOWN_COMMAND\x04";
 private:
     int BACKLOG = 8;
 };

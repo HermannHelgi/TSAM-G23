@@ -55,8 +55,10 @@ void Server::CheckTimeouts()
 
             if (helo_received[it->first] == 1)
             {
+                // TODO: change
                 int socket = it->first;
                 helo_received.erase(socket);
+                strike_counter.erase(socket);
                 list_of_connections.erase(fd_to_group_name[socket]);
                 connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[socket]));
                 group_name_to_fd.erase(fd_to_group_name[socket]);
@@ -73,6 +75,7 @@ void Server::CheckTimeouts()
             {
                 int socket = it->first;
                 helo_received.erase(socket);
+                strike_counter.erase(socket);
                 it = socket_timers.erase(it);
                 close(socket);
                 file_descriptors.erase(std::find_if(file_descriptors.begin(), file_descriptors.end(), [&](const pollfd& pfd) {
@@ -194,6 +197,7 @@ bool Server::ConnectToServer(string ip, int port)
     file_descriptors.push_back(new_pollfd);
     helo_received[new_pollfd.fd] = -1;
     socket_timers[new_pollfd.fd] = time(NULL);
+    strike_counter[new_pollfd.fd] = 0;
     Log(string("// CONNECT // New server connected on: ") + ip + " : " + to_string(new_pollfd.fd));
     SendHELO(new_pollfd.fd);
     return true;
@@ -252,6 +256,7 @@ int Server::CheckMessages()
                         Log(string("// CONNECT // New connection made: " + to_string(new_pollfd.fd)));
                         helo_received[new_pollfd.fd] = -1;
                         socket_timers[new_pollfd.fd] = time(NULL);
+                        strike_counter[new_pollfd.fd] = 0;
                         SendHELO(new_pollfd.fd);
                     }
                     else
@@ -274,15 +279,7 @@ int Server::CheckMessages()
                         {
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
 
-                            helo_received.erase(file_descriptors[i].fd);
-                            list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
-                            connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
-                            group_name_to_fd.erase(fd_to_group_name[file_descriptors[i].fd]);
-                            fd_to_group_name.erase(file_descriptors[i].fd);
-                            socket_timers.erase(file_descriptors[i].fd);
-                            close(file_descriptors[i].fd);
-                            file_descriptors.erase(file_descriptors.begin() + i);
-                            i--;
+                            CloseConnection(file_descriptors[i].fd, i);
                             clientSock = INT32_MAX;
                         }
                         else
@@ -290,30 +287,7 @@ int Server::CheckMessages()
                             Log(string("// DISCONNECT // Server Disconnected: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd)));
                             
                             // In case someone disconnects without saying HELO
-                            if (helo_received[file_descriptors[i].fd] == 1)
-                            {
-                                helo_received.erase(file_descriptors[i].fd);
-                                documented_servers.erase(fd_to_group_name[file_descriptors[i].fd]); // Don't want to reconnect to the same dud over and over
-                                list_of_connections.erase(fd_to_group_name[file_descriptors[i].fd]);
-                                connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[file_descriptors[i].fd]));
-                                group_name_to_fd.erase(fd_to_group_name[file_descriptors[i].fd]);
-                                fd_to_group_name.erase(file_descriptors[i].fd);
-                                socket_timers.erase(file_descriptors[i].fd);
-
-                                close(file_descriptors[i].fd);
-                                file_descriptors.erase(file_descriptors.begin() + i);
-                                i--;
-                                connected_servers--;
-                            }
-                            else
-                            {
-                                helo_received.erase(file_descriptors[i].fd);
-                                socket_timers.erase(file_descriptors[i].fd);
-                                close(file_descriptors[i].fd);
-                                file_descriptors.erase(file_descriptors.begin() + i);
-                                i--;
-                                connected_servers--;
-                            }
+                            CloseConnection(file_descriptors[i].fd, i);
                         }
                     }
                     else
@@ -335,7 +309,11 @@ int Server::CheckMessages()
                             time_t old_time = socket_timers[file_descriptors[i].fd];
                             socket_timers[file_descriptors[i].fd] = time(NULL);
 
-                            if (val == 2 && clientSock == INT32_MAX) // Might be client trying to connect.
+                            if (val == 1)
+                            {
+                                strike_counter[file_descriptors[i].fd] = 0;
+                            }
+                            else if (val == 2 && clientSock == INT32_MAX) // Might be client trying to connect.
                             {
                                 val = CheckClientPassword(client_password, clientSock, file_descriptors[i].fd);
 
@@ -359,11 +337,27 @@ int Server::CheckMessages()
                             }
                             else if (val == -1)
                             {
+                                strike_counter[file_descriptors[i].fd]++;
                                 socket_timers[file_descriptors[i].fd] = old_time;
                                 LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
                                 LogError(string(buffer));
-                                Log(string("// SENDING // " + errorMessage));
-                                send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
+                                string sendMSG;
+                                if (strike_counter[file_descriptors[i].fd] < 3)
+                                {
+                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd]);
+                                }
+                                else
+                                {
+                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd])+",YOU'RE,OUT";
+                                }
+
+                                Log(string("// SENDING // " + sendMSG));
+                                send(file_descriptors[i].fd, sendMSG.data(), sendMSG.size(), 0);
+
+                                if (strike_counter[file_descriptors[i].fd] >= 3)
+                                {
+                                    CloseConnection(file_descriptors[i].fd, i);
+                                }
                             }
                         }
                     }
@@ -372,6 +366,36 @@ int Server::CheckMessages()
         }
     }
     return 0;
+}
+
+void Server::CloseConnection(int fd, int i)
+{
+    if (helo_received[fd] == 1)
+    {
+        helo_received.erase(fd);
+        strike_counter.erase(fd);
+        documented_servers.erase(fd_to_group_name[fd]); // Don't want to reconnect to the same dud over and over
+        list_of_connections.erase(fd_to_group_name[fd]);
+        connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[fd]));
+        group_name_to_fd.erase(fd_to_group_name[fd]);
+        fd_to_group_name.erase(fd);
+        socket_timers.erase(fd);
+
+        close(fd);
+        file_descriptors.erase(file_descriptors.begin() + i);
+        i--;
+        connected_servers--;
+    }
+    else
+    {
+        helo_received.erase(fd);
+        strike_counter.erase(fd); 
+        socket_timers.erase(fd);
+        close(fd);
+        file_descriptors.erase(file_descriptors.begin() + i);
+        i--;
+        connected_servers--;
+    }
 }
 
 void Server::ClearBuffer()
