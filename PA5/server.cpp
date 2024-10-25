@@ -318,8 +318,8 @@ int Server::CheckMessages()
                             int val = ReceiveClientCommand(valread);
                             if (val == -1)
                             {
-                                Log(string("// SENDING // " + errorMessage));
-                                send(clientSock, errorMessage.data(), errorMessage.size(), 0);
+                                Log(string("// SENDING // " + failureMessageClient));
+                                send(clientSock, failureMessageClient.data(), failureMessageClient.size(), 0);
                             }
                         }
                         else
@@ -337,16 +337,7 @@ int Server::CheckMessages()
                             {
                                 val = CheckClientPassword(client_password, clientSock, file_descriptors[i].fd);
 
-                                // Just an Unknown message
-                                if (val == -1)
-                                {
-                                    LogError(string("// UNKNOWN // Failed to process command from server: " + to_string(file_descriptors[i].fd)));
-                                    LogError(string(buffer));
-                                    Log(string("// SENDING // " + errorMessage));
-                                    send(file_descriptors[i].fd, errorMessage.data(), errorMessage.size(), 0);
-                                }
-                                // This is client
-                                else
+                                if (val != -1 && val != -2)
                                 {
                                     connected_servers--;
                                     Log(string("// CLIENT // New client recognized: " + to_string(file_descriptors[i].fd)));
@@ -364,11 +355,11 @@ int Server::CheckMessages()
                                 string sendMSG;
                                 if (strike_counter[file_descriptors[i].fd] < 3)
                                 {
-                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd]);
+                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd]) + "\x04";
                                 }
                                 else
                                 {
-                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd])+",YOU'RE,OUT";
+                                    sendMSG = errorMessage + ",STRIKE:"+to_string(strike_counter[file_descriptors[i].fd])+",YOU'RE,OUT" + "\x04";
                                 }
 
                                 Log(string("// SENDING // " + sendMSG));

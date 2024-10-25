@@ -143,7 +143,9 @@ public:
     string client_name = "CLIENT";
     string client_password = "ASSDESTROYER"; 
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
-    string errorMessage = "\x01" "ERROR,UNKOWN_COMMAND\x04";
+    string failureMessageClient = "Unrecognized command.";
+    string errorMessage = "\x01" "ERROR,UNKNOWN_COMMAND";
+
 private:
     int BACKLOG = 8;
 };
