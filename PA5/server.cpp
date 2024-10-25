@@ -274,6 +274,7 @@ int Server::CheckMessages()
                             Log(string("// CLIENT // Client Disconnected: " + to_string(file_descriptors[i].fd)));
 
                             CloseConnection(file_descriptors[i].fd, i);
+                            i--;
                             clientSock = INT32_MAX;
                         }
                         else
@@ -282,6 +283,7 @@ int Server::CheckMessages()
                             
                             // In case someone disconnects without saying HELO
                             CloseConnection(file_descriptors[i].fd, i);
+                            i--;
                         }
                     }
                     else
@@ -343,7 +345,12 @@ int Server::CheckMessages()
                                 {
                                     Log("// DISCONNECT // Throwing out bad bot, too many failed messages: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
                                     CloseConnection(file_descriptors[i].fd, i);
+                                    i--;
                                 }
+                            }
+                            else if (val == -3)
+                            {
+                                
                             }
                         }
                     }
@@ -366,10 +373,8 @@ void Server::CloseConnection(int fd, int i)
         group_name_to_fd.erase(fd_to_group_name[fd]);
         fd_to_group_name.erase(fd);
         socket_timers.erase(fd);
-
         close(fd);
         file_descriptors.erase(file_descriptors.begin() + i);
-        i--;
         connected_servers--;
     }
     else
@@ -379,7 +384,6 @@ void Server::CloseConnection(int fd, int i)
         socket_timers.erase(fd);
         close(fd);
         file_descriptors.erase(file_descriptors.begin() + i);
-        i--;
         connected_servers--;
     }
 }
@@ -551,7 +555,7 @@ int Server::ReceiveServerCommand(int message_length, int fd)
             return -1;
         }
 
-        if (error_code == -1 || error_code == -2)
+        if (error_code < 0)
         {
             return error_code;
         }
@@ -876,13 +880,7 @@ int Server::RespondHELO(int fd, vector<string> variables)
             if (find(blacklist.begin(), blacklist.end(), variables[0]) != blacklist.end())
             {
                 Log("// DISCONNECT // Found BLACKLIST target. Throwing out.");
-
-                auto it = std::find_if(file_descriptors.begin(), file_descriptors.end(),
-                           [fd](const pollfd& pfd) { return pfd.fd == fd;});
-                int index = distance(file_descriptors.begin(), it);
-                CloseConnection(fd, index);
-
-                return 1;
+                return -3;
             }
             else
             {
