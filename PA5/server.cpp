@@ -52,37 +52,11 @@ void Server::CheckTimeouts()
         if (difftime(now, it->second) > expiration_of_servers && it->first != clientSock && it->first != listenSock)
         {
             Log(string("// DISCONNECT // Found a server who has been silent for too long: " + fd_to_group_name[it->first] + " : " + to_string(it->first)));
-
-            if (helo_received[it->first] == 1)
-            {
-                // TODO: change
-                int socket = it->first;
-                helo_received.erase(socket);
-                strike_counter.erase(socket);
-                list_of_connections.erase(fd_to_group_name[socket]);
-                connection_names.erase(find(connection_names.begin(), connection_names.end(), fd_to_group_name[socket]));
-                group_name_to_fd.erase(fd_to_group_name[socket]);
-                fd_to_group_name.erase(socket);
-                it = socket_timers.erase(it);
-
-                close(socket);
-                file_descriptors.erase(std::find_if(file_descriptors.begin(), file_descriptors.end(), [&](const pollfd& pfd) {
-                    return pfd.fd == socket;  // Compare the fd field of pollfd with socket
-                }));
-                connected_servers--;
-            }
-            else
-            {
-                int socket = it->first;
-                helo_received.erase(socket);
-                strike_counter.erase(socket);
-                it = socket_timers.erase(it);
-                close(socket);
-                file_descriptors.erase(std::find_if(file_descriptors.begin(), file_descriptors.end(), [&](const pollfd& pfd) {
-                    return pfd.fd == socket;  // Compare the fd field of pollfd with socket
-                }));
-                connected_servers--;
-            }
+            int socket = it->first;
+            auto it = std::find_if(file_descriptors.begin(), file_descriptors.end(),
+                        [socket](const pollfd& pfd) { return pfd.fd == socket;});
+            int index = distance(file_descriptors.begin(), it);
+            CloseConnection(socket, index);
         }
         else
         {
@@ -367,6 +341,7 @@ int Server::CheckMessages()
 
                                 if (strike_counter[file_descriptors[i].fd] >= 3)
                                 {
+                                    Log("// DISCONNECT // Throwing out bad bot, too many failed messages: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
                                     CloseConnection(file_descriptors[i].fd, i);
                                 }
                             }
@@ -898,19 +873,33 @@ int Server::RespondHELO(int fd, vector<string> variables)
         }
         else
         {
-            helo_received[fd] = 1;
-            fd_to_group_name[fd] = variables[0];
-            group_name_to_fd[variables[0]] = fd;
-            string ip_address = inet_ntoa(sin.sin_addr);
-            list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
-            documented_servers[variables[0]] = {ip_address, ntohs(sin.sin_port)};
-            
-            auto it = find(pending_connections.begin(), pending_connections.end(), variables[0]);
-            if (it != pending_connections.end())
+            if (find(blacklist.begin(), blacklist.end(), variables[0]) != blacklist.end())
             {
-                pending_connections.erase(it);
+                Log("// DISCONNECT // Found BLACKLIST target. Throwing out.");
+
+                auto it = std::find_if(file_descriptors.begin(), file_descriptors.end(),
+                           [fd](const pollfd& pfd) { return pfd.fd == fd;});
+                int index = distance(file_descriptors.begin(), it);
+                CloseConnection(fd, index);
+
+                return 1;
             }
-            Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
+            else
+            {
+                helo_received[fd] = 1;
+                fd_to_group_name[fd] = variables[0];
+                group_name_to_fd[variables[0]] = fd;
+                string ip_address = inet_ntoa(sin.sin_addr);
+                list_of_connections[variables[0]] = {ip_address, ntohs(sin.sin_port)};
+                documented_servers[variables[0]] = {ip_address, ntohs(sin.sin_port)};
+                
+                auto it = find(pending_connections.begin(), pending_connections.end(), variables[0]);
+                if (it != pending_connections.end())
+                {
+                    pending_connections.erase(it);
+                }
+                Log(string("// COMMAND // Group " + variables[0] + " has been tied to: " + ip_address));
+            }
         }
 
         return SendSERVERS(fd);
@@ -1065,8 +1054,7 @@ int Server::ReceiveClientCommand(int message_length)
     else if (message.substr(0, 11) == "LISTSERVERS")
     {
         Log(string("// CLIENT // Attempting to list of servers to client"));
-        //We can just reuse our servers function for this
-        return SendSERVERS(clientSock); 
+        return RespondLISTSERVERS(); 
     }
     else if (message.substr(0, 13) == "CONNECTSERVER")
     {

@@ -146,6 +146,7 @@ public:
     string failureMessageClient = "Unrecognized command.";
     string errorMessage = "\x01" "ERROR,UNKNOWN_COMMAND";
 
+    vector<string> blacklist = {"A5_300"};
 private:
     int BACKLOG = 8;
 };
