@@ -1389,11 +1389,3 @@ int Server::RespondDOCSERVERS()
         return 1;
     }
 }
-
-int Server::RespondLISTSERVERS()
-{
-
-    //We can just reuse our servers function for this
-    return SendSERVERS(clientSock);
-
-}
