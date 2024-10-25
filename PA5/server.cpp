@@ -1163,6 +1163,36 @@ int Server::CheckClientPassword(string password, int &clientSock, int socketNum)
     return -1;
 }
 
+int Server::RespondLISTSERVERS()
+{
+    string send_buffer = "SERVERS: \n";
+    size_t pos = 0;
+    string group_info;
+
+    for (const auto& group_server : Server::list_of_connections) 
+    {
+        if (group_server.first == client_name)
+        {
+            continue;
+        }
+        group_info = group_server.first +", "+ group_server.second.first +", "+ to_string(group_server.second.second)+";\n";
+        send_buffer += group_info;
+    }
+
+    send_buffer += '\x04';
+    Log(string("// SENDING // " + string(send_buffer)));
+    if(send(clientSock, send_buffer.data(), send_buffer.length(), 0) < 0)
+    {
+        LogError(string("// COMMAND // Failed to send list of servers"));
+        return -2;
+    }
+    else
+    {
+        Log(string("// COMMAND // Succeeded in sending list of servers"));
+        return 1;
+    }
+}
+
 int Server::RespondGetMSG(string group_id)
 {
     string send_buffer;
