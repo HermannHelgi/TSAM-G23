@@ -350,7 +350,9 @@ int Server::CheckMessages()
                             }
                             else if (val == -3)
                             {
-                                
+                                Log("// DISCONNECT // Throwing out blacklisted bot: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
+                                CloseConnection(file_descriptors[i].fd, i);
+                                i--;
                             }
                         }
                     }
