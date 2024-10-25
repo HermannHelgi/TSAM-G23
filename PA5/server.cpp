@@ -92,6 +92,19 @@ void Server::CheckTimeouts()
     }
 }
 
+bool Server::CheckServerConnection(string name, string IP, int port)
+{
+    for (const auto& connection : list_of_connections) {
+        string existingGroupName = connection.first;
+        pair<string, int> ipAndPort = connection.second;
+
+        if (existingGroupName == name || (ipAndPort.first == IP && ipAndPort.second == port)) {
+            return true; 
+        }
+    }
+    return false;
+}
+
 void Server::CheckForMoreConnections()
 {
     if (connected_servers < min_server_capacity && documented_servers.size() != connected_servers)
@@ -100,7 +113,7 @@ void Server::CheckForMoreConnections()
 
         while (it != documented_servers.end())
         {
-            if (list_of_connections.count(it->first) || find(pending_connections.begin(), pending_connections.end(), it->first) != pending_connections.end())
+            if (CheckServerConnection(it->first, it->second.first, it->second.second) || find(pending_connections.begin(), pending_connections.end(), it->first) != pending_connections.end())
             {
                 // ALREADY CONNECTED / PENDING
                 it++;
@@ -129,6 +142,13 @@ void Server::CheckForMoreConnections()
                     LogError(string("// CONNECT // Failed to set up connection with documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port)));
                     it = documented_servers.erase(it);
                 }
+            }
+            else
+            {
+                string server_ip = it->second.first;
+                int server_port = it->second.second;
+                LogError("// CONNECT // Documented server: " + it->first + " : " + server_ip + " : " + to_string(server_port) + " failed some parameters and was removed.");
+                it = documented_servers.erase(it);
             }
         }
     }

@@ -57,6 +57,7 @@ public:
 
     // Helper Functions
     void CloseConnection(int fd, int i);
+    bool CheckServerConnection(string name, string IP, int port);
     bool ConnectToServer(string ip, int port);
     void ClearBuffer();
     void Log(string message);
