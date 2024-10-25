@@ -93,7 +93,7 @@ void Server::CheckForMoreConnections()
                 it++;
                 continue;
             }
-            else if (it->first != group_name && (it->second.second != portnum || (it->second.first != ip_address && it->second.first != localhost)))
+            else if (it->first != group_name && (it->second.second != portnum || (it->second.first != ip_address && it->second.first != localhost)) && find(blacklist.begin(), blacklist.end(), it->first) == blacklist.end())
             {
                 // CAN CONNECT
                 string server_ip = it->second.first;
