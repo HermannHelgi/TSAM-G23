@@ -67,6 +67,14 @@ public:
     // Botnet commands. 
     // Respond means that the server is usually taking in some data and sending something back.
     // Send means the server just sends that command.
+    
+    // IMPORTANT INFORMATION!
+    // ReceiveServerCommand can return several error codes, all meaning different things!
+    // 1 means success.
+    // 2 means that the server detected the Client password.
+    // -1 means failure to process a command from another bot.
+    // -2 means that something failed on our end.
+    // -3 is rxclusivelly for HELO, as it sends -3 when it detects a repeat connection or blacklisted bot.
     int ReceiveServerCommand(int message_length, int fd);
     void StripServerMessage(int message_length, vector<string> &commands, vector<vector<string>> &variables);
     int RespondHELO(int fd, vector<string> variables);

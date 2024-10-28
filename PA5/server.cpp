@@ -302,6 +302,15 @@ int Server::CheckMessages()
                         {
                             Log(string("// COMMAND // New command from Server: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd)));
                             int val = ReceiveServerCommand(valread, file_descriptors[i].fd);
+
+                            // IMPORTANT INFORMATION!
+                            // ReceiveServerCommand can return several error codes, all meaning different things!
+                            // 1 means success.
+                            // 2 means that the server detected the Client password.
+                            // -1 means failure to process a command from another bot.
+                            // -2 means that something failed on our end.
+                            // -3 is rxclusivelly for HELO, as it sends -3 when it detects a repeat connection or blacklisted bot.  
+
                             time_t old_time = socket_timers[file_descriptors[i].fd];
                             socket_timers[file_descriptors[i].fd] = time(NULL);
 

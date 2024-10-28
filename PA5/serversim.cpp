@@ -74,8 +74,6 @@ int main(int argc, char* argv[])
             getline(cin, message_intake);
             new_string += message_intake + '\x04' + '\x01';
             getline(cin, message_intake);
-            new_string += message_intake + '\x04' + '\x01';
-            getline(cin, message_intake);
             new_string += message_intake;
             message_intake = new_string;
         }
