@@ -18,11 +18,13 @@ Running 'make clean' will remove all executables AND the Log/ErrorLog files, in 
 ## HOW TO RUN
 
 SERVER:
+
 After compiling, running ./tsamgroup23 < port > will start the server with the given port number. 
 The server uses a hardcoded ip address for self analysis.
 It will need to be changed if the server is run on something other then the TSAM server.
 
 CLIENT:
+
 To run the client, simply run ./client < ip > < port > with the same port as the server.
 Once connected, the client will be prompted to type in a password to prove its authenticity.
 This is a security feature to prevent other client's to connect to our server.
@@ -30,8 +32,11 @@ The password can be found at the bottom of the server.h file and can be changed 
 Currently it is set to: Admin123
 
 SERVERSIM:
+
 In addition to these files, there is also a 'serversim' file. This can be run with: ./serversim < ip > < port >.
 This file allows you to 'simulate' a bot connecting to the main server and send commands. 
+This is given for convenience, and can be used for debugging, and does not need to be graded.
+
 It will try and connect to the given IP and portnumber and from there you can manually type commands 
 to test the server. Such as 'HELO,A5_1' and such. Typing in 'DOUBLE' at any time will allow you to send two commands at once.
 Note, the server simulator only adds SOH/EOT characters to your messages.
