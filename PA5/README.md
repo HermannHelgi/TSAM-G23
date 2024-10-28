@@ -26,7 +26,7 @@ It will need to be changed if the server is run on something other then the TSAM
 CLIENT:
 
 To run the client, simply run ./client < ip > < port > with the same port as the server.
-Once connected, the client will be prompted to type in a password to prove its authenticity.
+Once connected, the client will be prompted to type in a password to prove its authentication.
 This is a security feature to prevent other client's to connect to our server.
 The password can be found at the bottom of the server.h file and can be changed as you wish.
 Currently it is set to: Admin123
@@ -53,10 +53,10 @@ Example (connects to Instr_1): CONNECTSERVER,130.208.246.249,5001
 
     - This allows for jumpstarting the server if there aren't any other bots scanning for connections.
     
-* MESSAGEBUFFER: Shows what messages addressed to us are stored and from who.
+* MESSAGEBUFFER: Shows what is stored in the message buffer, which contains the messages sent to us.
 To run, send: MESSAGEBUFFER
 
-    - This message takes no options. The user can use this command in combination with GETMSG.
+    - This message takes no options. The user can then use this command in combination with GETMSG.
     - This is for ease of use, so the user doesn't have to guess what groups may have sent a message.
 
 * DOCSERVERS: Shows what bots have been documented.
@@ -80,7 +80,7 @@ The tsamgroup23.cpp file is simply a shell file which runs an infinite loop of c
 Our actual server is implemented in a large class which can be found in the server.cpp/.h files.
 
 ## A5_300
-We would like to mention our black list and the only group that is on it.
+We would like to give a special mention our black list and the only group that is on it.
 A5_300 has been great for finding bugs within our code such as:
 * Creating a death spiral of error commands back and forth,
 * Sending negative messages in STATUSRESP,
