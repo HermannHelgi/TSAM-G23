@@ -137,16 +137,16 @@ public:
     map<int, int> strike_counter;                   // Map of strike counts. From FD to amount of strikes.
 
     // Name variables and presets.
-    string ip_address = "130.208.246.249";
+    string ip_address = "130.208.246.249";          // Server IP address. Must be manuallly changed on relocation.
     string localhost = "127.0.0.1";
     string group_name = "A5_23";
     string client_name = "CLIENT";
-    string client_password = "ASSDESTROYER"; 
+    string client_password = "Admin123";            // Password for Client/Server connection.
     string acceptMessage = "Welcome [CLIENT], how can I help you today?";
     string failureMessageClient = "Unrecognized command.";
     string errorMessage = "\x01" "ERROR,UNKNOWN_COMMAND";
 
-    vector<string> blacklist = {"A5_300"};
+    vector<string> blacklist = {"A5_300"};          // Manual Blacklist added.
 private:
     int BACKLOG = 8;
 };
