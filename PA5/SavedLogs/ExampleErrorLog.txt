@@ -1,55 +1,47 @@
-[2024-10-24 15:58:48] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 15:58:55] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:00:08] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:00:08] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:07:17] // COMMAND // Portnum not a number: -1 continuing.
-[2024-10-24 16:18:32] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
-[2024-10-24 16:19:02] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
-[2024-10-24 16:19:42] Be aware of scams: Hi, my address is NOT 130.208.246.249,47744, but 130.208.246.249,4300
-[2024-10-24 16:19:49] Be aware of scams: Hi, my address is NOT 130.208.246.249,39332, but 130.208.246.249,4400
-[2024-10-24 16:19:53] Be aware of scams: Hi, my address is NOT 130.208.246.249,39332, but 130.208.246.249,4400
-[2024-10-24 16:20:23] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:20:23] KEEPALIVE,0
-[2024-10-24 16:21:23] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:21:23] KEEPALIVE,0
-[2024-10-24 16:21:59] Hello from A5_3!!!
-[2024-10-24 16:22:23] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:22:23] KEEPALIVE,0
-[2024-10-24 16:23:23] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:23:23] KEEPALIVE,0
-[2024-10-24 16:27:34] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:30:04] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:30:04] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:30:04] SENDMSG,A5_42,A5_9,lol
-[2024-10-24 16:31:54] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:31:54] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:31:54] GETMSGS,A5_9
-[2024-10-24 16:32:31] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:32:40] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:34:40] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:34:40] // COMMAND // Not connected to group: A5_14
-[2024-10-24 16:36:21] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:37:44] // MESSAGE // Could not find SOH or EOT.
-[2024-10-24 16:38:46] hello
-[2024-10-24 16:46:16] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:46:16] KEEPALIVE,0
-[2024-10-24 16:47:16] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:47:16] KEEPALIVE,0
-[2024-10-24 16:48:16] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:48:16] KEEPALIVE,0
-[2024-10-24 16:49:16] // UNKNOWN // Failed to process command from server: 6
-[2024-10-24 16:49:16] KEEPALIVE,0
+[2024-10-28 14:12:02] // MESSAGE // Could not find SOH or EOT.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // CONNECT // Connection timed out.
+[2024-10-28 14:12:11] // CONNECT // Failed to set up connection with documented server: A5_28 : 172.31.198.141 : 4005
+[2024-10-28 14:12:11] // CONNECT // Documented server: A5_300 : 130.208.246.249 : 4300 failed some parameters and was removed.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:11] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:12:54] // MESSAGE // Could not find SOH or EOT.
+[2024-10-28 14:12:54] // UNKNOWN // Failed to process command from server: 6
+[2024-10-28 14:12:54] SENDMSG,A5_23,A5_300,This is my random byte stuffing delivery test:
+[2024-10-28 14:14:33] // MESSAGE // Could not find SOH or EOT.
+[2024-10-28 14:14:47] // CONNECT // Documented server: A5_23
+ : 130.208.246.249 : 4123 failed some parameters and was removed.
+[2024-10-28 14:14:47] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:14:47] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:14:47] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:14:47] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:14:47] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:15:39] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:19:00] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:19:00] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_420 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: Instr_2 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: Instr_3 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: Instr_1 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_69 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_12 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_2 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_70 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number: A5_23 continuing.
+[2024-10-28 14:24:02] // COMMAND // Portnum not a number:  continuing.
+[2024-10-28 14:28:00] // MESSAGE // Could not find SOH or EOT.
+[2024-10-28 14:30:38] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:30:38] // COMMAND // Portnum not a number: -1 continuing.
+[2024-10-28 14:32:04] // MESSAGE // Could not find SOH or EOT.

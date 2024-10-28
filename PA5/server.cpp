@@ -1196,7 +1196,6 @@ int Server::RespondGetMSG(string group_id)
         //There is a stored messages
         if(our_message_buffer[group_id].size() > 0)
         {
-            LogError(our_message_buffer[group_id].front());
             send_buffer += our_message_buffer[group_id].front();
             our_message_buffer[group_id].pop();
 
