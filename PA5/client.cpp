@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
         cout << "Waiting for response. " << endl;
         int bytes = recv(server_sock, buffer, buffer_size, MSG_WAITFORONE);
-        cout << "Message received, size: " << bytes << " - Message: " << buffer << endl;
+        cout << "Message received, size: " << bytes << endl;
         buffer[bytes] = '\0';
 
         if (bytes <= 0)
