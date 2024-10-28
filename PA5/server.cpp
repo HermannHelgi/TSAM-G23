@@ -350,7 +350,7 @@ int Server::CheckMessages()
                             }
                             else if (val == -3)
                             {
-                                Log("// DISCONNECT // Throwing out blacklisted bot: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
+                                Log("// DISCONNECT // Throwing out bot: " + fd_to_group_name[file_descriptors[i].fd] + " : " + to_string(file_descriptors[i].fd));
                                 CloseConnection(file_descriptors[i].fd, i);
                                 i--;
                             }
@@ -869,7 +869,6 @@ int Server::RespondHELO(int fd, vector<string> variables)
 {
     if (variables.size() == 1)
     {
-        connection_names.emplace_back(variables[0]);
         struct sockaddr_in sin;
         socklen_t len = sizeof(sin);
         if (getpeername(fd, (struct sockaddr*)&sin, &len) < 0)
@@ -891,6 +890,7 @@ int Server::RespondHELO(int fd, vector<string> variables)
             }
             else
             {
+                connection_names.emplace_back(variables[0]);
                 helo_received[fd] = 1;
                 fd_to_group_name[fd] = variables[0];
                 group_name_to_fd[variables[0]] = fd;
