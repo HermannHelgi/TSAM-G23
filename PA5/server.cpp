@@ -884,6 +884,11 @@ int Server::RespondHELO(int fd, vector<string> variables)
                 Log("// DISCONNECT // Found BLACKLIST target. Throwing out.");
                 return -3;
             }
+            else if (find(connection_names.begin(), connection_names.end(), variables[0]) != connection_names.end())
+            {
+                Log("// DISCONNECT // Group already connected. Throwing out.");
+                return -3;
+            }
             else
             {
                 helo_received[fd] = 1;
