@@ -71,7 +71,9 @@ To run, send: DOCSERVERS
 
 ## FOR GRADING
 Within the .Zip file, we have a folder called SavedFiles.
-Within this folder are all the files which are referenced by the Project Report.
+Within this folder are all the files which are referenced by the ProjectReport.pdf.
+
+Please read that .pdf as it goes over all our points for grading and potential bonus points.
 
 ## NOTE ON STRUCTURE
 The tsamgroup23.cpp file is simply a shell file which runs an infinite loop of commands to the server.cpp file.
